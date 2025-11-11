@@ -37,14 +37,14 @@ public class BreedController {
 	private final IBreedService service;
 
 	@GetMapping("/{id}")
-	@PreAuthorize(BreedConstants.ADMIN_AUTHORITY)
+	@PreAuthorize(BreedConstants.ADMIN_READ_AUTHORITY)
 	@ApiResponse(responseCode = "200", description = BreedConstants.FIND_BY_ID)
 	public ResponseEntity<BreedDTO> findById(@PathVariable UUID id) {
 		return ResponseEntity.ok(service.findByIdToDto(id));
 	}
 
 	@GetMapping
-	@PreAuthorize(BreedConstants.ADMIN_AUTHORITY)
+	@PreAuthorize(BreedConstants.ADMIN_READ_AUTHORITY)
 	@ApiResponse(responseCode = "200", description = BreedConstants.FIND_ALL)
 	public ResponseEntity<Page<BreedDTO>> findAll(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {

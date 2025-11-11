@@ -11,6 +11,8 @@ public final class MenuConstants {
 	public static final String BASE_API = "/api";
 	public static final String BASE_PATH = BASE_API + "/menu";
 	public static final String ADMIN_AUTHORITY = "hasAnyAuthority('ADMIN')";
+	public static final String ADMIN_READ_AUTHORITY = "hasAnyAuthority('ADMIN', 'ADMIN_READ')";
+	
 
 	public static final String FIND_ALL = "Lista de menus retornada com sucesso.";
 }

@@ -8,8 +8,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.animaladoption.api.dto.dog.DogFilterDTO;
+import com.animaladoption.api.repository.specification.DogSpecification;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.animaladoption.api.dto.ContactDTO;
@@ -50,8 +55,14 @@ public class DogServiceImpl implements IDogService {
      */
     @Override
     @Transactional
-    public Page<DogDTO> findAll(Pageable page) {
-        return repo.findAll(page)
+    public Page<DogDTO> findAll(Pageable page, DogFilterDTO filter) {
+        Specification<Dog> spec = DogSpecification.filterBy(filter);
+
+        Pageable pageableRequest = PageRequest.of(page.getPageNumber(), page.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdDate"));
+
+        Page<Dog> dogs = repo.findAll(spec, pageableRequest);
+        return dogs
                 .map(mapper::toDto)
                 .map(dto -> {
                     if (dto.getImages() != null) {

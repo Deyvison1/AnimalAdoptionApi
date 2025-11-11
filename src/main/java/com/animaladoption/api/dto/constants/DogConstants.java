@@ -16,7 +16,7 @@ public class DogConstants {
 
 	// Roles
 	public static final String ADMIN_AUTHORITY = "hasAuthority('ADMIN')";
-
+	public static final String ADMIN_READ_AUTHORITY = "hasAnyAuthority('ADMIN', 'ADMIN_READ')";
 	// Response descriptions
 	public static final String FIND_BY_ID = "Busca dos do registro pelo identificador realizada com sucesso.";
 	public static final String FIND_ALL = "Busca dos registros com paginação realizada com sucesso.";

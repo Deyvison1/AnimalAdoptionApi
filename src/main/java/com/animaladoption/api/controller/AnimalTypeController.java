@@ -37,14 +37,14 @@ public class AnimalTypeController {
 	private final IAnimalTypeService service;
 
 	@GetMapping("/{id}")
-	@PreAuthorize(AnimalTypeConstants.ADMIN_AUTHORITY)
+	@PreAuthorize(AnimalTypeConstants.ADMIN_READ_AUTHORITY)
 	@ApiResponse(responseCode = "200", description = AnimalTypeConstants.FIND_BY_ID)
 	public ResponseEntity<AnimalTypeDTO> findById(@PathVariable UUID id) {
 		return ResponseEntity.ok(service.findByIdToDto(id));
 	}
 
 	@GetMapping
-	@PreAuthorize(AnimalTypeConstants.ADMIN_AUTHORITY)
+	@PreAuthorize(AnimalTypeConstants.ADMIN_READ_AUTHORITY)
 	@ApiResponse(responseCode = "200", description = AnimalTypeConstants.FIND_ALL)
 	public ResponseEntity<Page<AnimalTypeDTO>> findAll(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {

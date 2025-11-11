@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class MenuController {
 	
 	@GetMapping
-	@PreAuthorize(MenuConstants.ADMIN_AUTHORITY)
+	@PreAuthorize(MenuConstants.ADMIN_READ_AUTHORITY)
 	@ApiResponse(responseCode = "201", description = MenuConstants.FIND_ALL)
 	public ResponseEntity<Set<MenuDTO>> finAll() {
 		return ResponseEntity.ok(MenuEnum.findAll());
