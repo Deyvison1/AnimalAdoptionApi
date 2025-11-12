@@ -15,4 +15,6 @@ public class DogFilterDTO {
     private String name;
     private String breed;
     private Integer age;
+    private String valueContact;
+    private String nameContact;
 }

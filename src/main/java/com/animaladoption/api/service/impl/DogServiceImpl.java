@@ -51,6 +51,7 @@ public class DogServiceImpl implements IDogService {
      * Retorna uma página de cães.
      *
      * @param page informações de paginação
+     * @param filter informações dos filtros
      * @return página contendo DogDTO
      */
     @Override
@@ -65,7 +66,7 @@ public class DogServiceImpl implements IDogService {
         return dogs
                 .map(mapper::toDto)
                 .map(dto -> {
-                    if (dto.getImages() != null) {
+                    if (Objects.nonNull(dto.getImages())) {
                         dto.getImages().sort(Comparator.comparing(AnimalImageDTO::getActive).reversed());
                     }
                     return dto;
@@ -99,11 +100,9 @@ public class DogServiceImpl implements IDogService {
         Dog entity = findById(id);
         DogDTO dtoMapped = setRequestUpdate(dto);
 
-        // Atualiza campos básicos
         updateBasicFields(entity, dtoMapped);
 
-        // Atualiza contatos
-        if (dto.getContacts() != null) {
+        if (Objects.nonNull(dto.getContacts())) {
             setContactsToUpdate(entity.getContacts(), dto.getContacts(), entity);
         }
 
@@ -155,32 +154,28 @@ public class DogServiceImpl implements IDogService {
      * Atualiza ou cria contatos associados ao Animal
      */
     private void setContactsToUpdate(Set<Contact> entities, Set<ContactDTO> dtos, Animal animal) {
-        // Mapear contatos existentes pelo id
+
         Map<UUID, Contact> existingById = entities.stream()
-                .filter(e -> e.getId() != null)
+                .filter(e -> Objects.nonNull(e.getId()))
                 .collect(Collectors.toMap(Contact::getId, e -> e));
 
-        // Atualizar ou criar novas entidades
         Set<Contact> updatedEntities = dtos.stream()
                 .map(dto -> {
                     Contact entity = Optional.ofNullable(dto.getId())
                             .map(existingById::get)
                             .orElseGet(Contact::new);
 
-                    // Atualizar campos se necessário
                     if (isChangeContact(entity, dto)) {
                         entity.setName(dto.getName());
                         entity.setValue(dto.getValue());
                     }
 
-                    // Garantir que a referência para o Animal esteja setada
                     entity.setAnimal(animal);
 
                     return entity;
                 })
                 .collect(Collectors.toSet());
 
-        // Substituir o set original
         entities.clear();
         entities.addAll(updatedEntities);
     }
@@ -189,7 +184,7 @@ public class DogServiceImpl implements IDogService {
      * Verifica se houve alteração no contato
      */
     private boolean isChangeContact(Contact entity, ContactDTO dto) {
-        if (entity == null || dto == null) return true;
+        if (Objects.isNull(entity) || Objects.isNull(dto)) return true;
         return !Objects.equals(entity.getName(), dto.getName()) ||
                !Objects.equals(entity.getValue(), dto.getValue());
     }
@@ -206,9 +201,8 @@ public class DogServiceImpl implements IDogService {
                 .name(breedDTO.getName())
                 .build());
 
-        // Contatos
         Set<Contact> contacts = contactMapper.toEntitySet(dto.getContacts());
-        if (contacts != null) {
+        if (Objects.nonNull(contacts)) {
             contacts.forEach(contact -> contact.setAnimal(entity));
         }
         entity.setContacts(contacts);

@@ -2,6 +2,7 @@ package com.animaladoption.api.service.impl;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -121,7 +122,7 @@ public class AnimalImageServiceImpl implements IAnimalImageService {
 	private void validateActiveImages(AnimalImage entity) {
 		List<AnimalImage> allImages = repository.findByAnimalId(entity.getAnimal().getId());
 
-		if (allImages == null || allImages.isEmpty()) {
+		if (Objects.isNull(allImages) || allImages.isEmpty()) {
 			return;
 		}
 
