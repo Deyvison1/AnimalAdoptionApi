@@ -9,8 +9,8 @@
 		<version>3.4.11</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>nimaladoption</groupId>
-	<artifactId>nimaladoption</artifactId>
+	<groupId>animaladoption</groupId>
+	<artifactId>animaladoption</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>AnimalAdoption</name>
 	<description>Api para prover endponts para web de site de adocao de animais.</description>
