@@ -55,7 +55,7 @@ public class DogSpecification {
 
     private static Specification<Dog> hasContactValue(String contactValue) {
         return (root, query, cb) -> {
-            if (contactValue == null || contactValue.isBlank()) {
+            if (Objects.isNull(contactValue) || contactValue.isBlank()) {
                 return null;
             }
 

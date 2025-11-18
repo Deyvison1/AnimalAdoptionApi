@@ -32,17 +32,8 @@ public class PublicController {
 	@ApiResponse(responseCode = "200", description = DogConstants.FIND_ALL)
 	public ResponseEntity<Page<DogDTO>> findAll(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, @ModelAttribute DogFilterDTO filter) {
-		Pageable pageable = PageRequest.of(page, size);
-
-	    Page<DogDTO> result = dogService.findAll(pageable, filter);
-
-	    List<DogDTO> filtered = result.getContent()
-	            .stream()
-	            .filter(DogDTO::getAvailable)
-	            .collect(Collectors.toList());
-
-	    Page<DogDTO> resp = new PageImpl<DogDTO>(filtered, pageable, filtered.size());
-
-	    return ResponseEntity.ok(resp);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DogDTO> resp = dogService.findAll(pageable, filter);
+        return ResponseEntity.ok(resp);
 	}
 }

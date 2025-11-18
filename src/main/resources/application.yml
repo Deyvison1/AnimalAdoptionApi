@@ -29,6 +29,8 @@ spring:
 server:
   port: 8081
 
+image-api:
+  url: http://image-api.barbershop-app.shop:8082
 keycloak-config:
   client-public-key: ANIMAL_ADOPTION_CLIENT
   internal-url: https://keycloak.barbershop-app.shop:8443

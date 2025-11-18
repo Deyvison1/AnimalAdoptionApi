@@ -3,6 +3,7 @@ package com.animaladoption.api.dto.animal;
 import java.io.Serial;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import com.animaladoption.api.dto.ContactDTO;
 import com.animaladoption.api.dto.base.BaseDTO;
@@ -26,6 +27,7 @@ public abstract class AnimalDTO extends BaseDTO {
 	private String description;
 	private Integer age;
 	private BreedDTO breed;
-	private List<AnimalImageDTO> images;
+	private List<UUID> images;
+    private List<ImageDTO> imagesComplet;
 	private Set<ContactDTO> contacts;
 }

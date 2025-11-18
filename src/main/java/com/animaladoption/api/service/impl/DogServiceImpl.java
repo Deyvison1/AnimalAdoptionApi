@@ -1,15 +1,14 @@
 package com.animaladoption.api.service.impl;
 
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.animaladoption.api.client.IImageClient;
+import com.animaladoption.api.dto.animal.ImageDTO;
 import com.animaladoption.api.dto.dog.DogFilterDTO;
 import com.animaladoption.api.repository.specification.DogSpecification;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +17,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.animaladoption.api.dto.ContactDTO;
-import com.animaladoption.api.dto.animal.AnimalImageDTO;
 import com.animaladoption.api.dto.breed.BreedDTO;
 import com.animaladoption.api.dto.dog.DogCreateDTO;
 import com.animaladoption.api.dto.dog.DogDTO;
@@ -34,10 +32,11 @@ import com.animaladoption.api.model.Dog;
 import com.animaladoption.api.repository.IDogRepository;
 import com.animaladoption.api.service.IBreedService;
 import com.animaladoption.api.service.IDogService;
+import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DogServiceImpl implements IDogService {
@@ -46,7 +45,10 @@ public class DogServiceImpl implements IDogService {
     private final IBreedService breedService;
     private final IBreedMapper breedMapper;
     private final IContactMapper contactMapper;
+    private final IImageClient imageClient;
 
+    @Value("${image-api.url}")
+    private String imageApiBaseUrl;
     /**
      * Retorna uma página de cães.
      *
@@ -63,15 +65,34 @@ public class DogServiceImpl implements IDogService {
                 Sort.by(Sort.Direction.DESC, "createdDate"));
 
         Page<Dog> dogs = repo.findAll(spec, pageableRequest);
-        return dogs
-                .map(mapper::toDto)
-                .map(dto -> {
-                    if (Objects.nonNull(dto.getImages())) {
-                        dto.getImages().sort(Comparator.comparing(AnimalImageDTO::getActive).reversed());
-                    }
-                    return dto;
-                });
+
+        return dogs.map(dog -> {
+            DogDTO dto = mapper.toDto(dog);
+
+            if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+                List<ImageDTO> imageDTOs = dto.getImages().stream()
+                        .map(this::monthImg)
+                        .collect(Collectors.toList());
+
+                dto.setImagesComplet(imageDTOs);
+            }
+
+            return dto;
+        });
     }
+
+    private ImageDTO monthImg(UUID id) {
+        try {
+            ImageDTO img = imageClient.getImage(id);
+            // Ajusta a URL completa
+            img.setUrl(imageApiBaseUrl + img.getUrl());
+            return img;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
 
     /**
      * Cria um novo cão.
@@ -130,10 +151,27 @@ public class DogServiceImpl implements IDogService {
      * @throws NotFoundException se o cão não for encontrado
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public DogDTO findByIdDTO(UUID id) {
-        return mapper.toDto(findById(id));
+        Dog dog = findById(id);
+        DogDTO dto = mapper.toDto(dog);
+
+        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+            List<ImageDTO> imageDTOs = dto.getImages().stream()
+                    .map(this::monthImg)
+                    .peek(img -> {
+                        if (img.getUrl() != null && !img.getUrl().startsWith("http")) {
+                            img.setUrl(imageApiBaseUrl + img.getUrl());
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+            dto.setImagesComplet(imageDTOs);
+        }
+
+        return dto;
     }
+
 
     /**
      * Mapeia dados do DTO de atualização para o DTO do mapper

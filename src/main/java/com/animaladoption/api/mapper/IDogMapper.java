@@ -9,7 +9,7 @@ import com.animaladoption.api.dto.dog.DogUpdateDTO;
 import com.animaladoption.api.mapper.base.IBaseMapper;
 import com.animaladoption.api.model.Dog;
 
-@Mapper(componentModel = "spring", uses = { IContactMapper.class, IAnimalImageMapper.class })
+@Mapper(componentModel = "spring", uses = { IContactMapper.class })
 public interface IDogMapper extends IBaseMapper<Dog, DogDTO> {
 
 	@Mapping(target = "id", ignore = true)
