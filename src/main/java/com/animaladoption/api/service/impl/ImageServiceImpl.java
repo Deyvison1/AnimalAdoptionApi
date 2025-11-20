@@ -50,11 +50,6 @@ public class ImageServiceImpl implements IImageService {
 
             ImageDTO uploaded = imageClient.uploadImage(file, active);
 
-            // ✅ Ajusta a URL para conter o domínio/porta da API
-            if (uploaded != null && uploaded.getUrl() != null && !uploaded.getUrl().startsWith("http")) {
-                uploaded.setUrl(imageApiBaseUrl + uploaded.getUrl());
-            }
-
             UUID uploadedId = uploaded.getId();
 
             if (animal.getImages() == null) {
