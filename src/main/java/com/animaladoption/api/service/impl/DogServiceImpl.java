@@ -49,6 +49,9 @@ public class DogServiceImpl implements IDogService {
 
     @Value("${image-api.url}")
     private String imageApiBaseUrl;
+    
+    @Value("${image-api.url-images}")
+    private String baseUrlImage;
     /**
      * Retorna uma página de cães.
      *
@@ -84,8 +87,7 @@ public class DogServiceImpl implements IDogService {
     private ImageDTO monthImg(UUID id) {
         try {
             ImageDTO img = imageClient.getImage(id);
-            // Ajusta a URL completa
-            img.setUrl(imageApiBaseUrl + img.getUrl());
+            img.setUrl(baseUrlImage + img.getUrl());
             return img;
         } catch (Exception e) {
             log.error(e.getMessage());

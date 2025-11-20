@@ -22,7 +22,7 @@ public class SecurityConfig {
 
     @Value("${keycloak-config.client-public-key}")
     private final String clientId = "myclient";
-
+    
     @Bean
     KeycloakJwtAuthenticationConverter keycloakJwtAuthenticationConverter() {
         return new KeycloakJwtAuthenticationConverter(clientId);
@@ -42,7 +42,7 @@ public class SecurityConfig {
 
     static CorsConfigurationSource getCorsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+        configuration.setAllowedOrigins(List.of("http://localhost:4200", "https://app.barbershop-app.shop:4443"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
         configuration.setAllowCredentials(true);

@@ -1,11 +1,8 @@
 package com.animaladoption.api.controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 import com.animaladoption.api.dto.dog.DogFilterDTO;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
