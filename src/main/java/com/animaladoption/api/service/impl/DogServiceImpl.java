@@ -165,11 +165,6 @@ public class DogServiceImpl implements IDogService {
         if (dto.getImages() != null && !dto.getImages().isEmpty()) {
             List<ImageDTO> imageDTOs = dto.getImages().stream()
                     .map(this::monthImg)
-                    .peek(img -> {
-                        if (img.getUrl() != null && !img.getUrl().startsWith("http")) {
-                            img.setUrl(imageApiBaseUrl + img.getUrl());
-                        }
-                    })
                     .collect(Collectors.toList());
 
             dto.setImagesComplet(imageDTOs);
