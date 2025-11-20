@@ -4,7 +4,6 @@ import com.animaladoption.api.client.IImageClient;
 import com.animaladoption.api.dto.animal.ImageDTO;
 import com.animaladoption.api.exception.ImageApiException;
 import com.animaladoption.api.model.Animal;
-import com.animaladoption.api.model.Dog;
 import com.animaladoption.api.repository.IAnimalRepository;
 import com.animaladoption.api.service.IImageService;
 import com.fasterxml.jackson.databind.JsonNode;
