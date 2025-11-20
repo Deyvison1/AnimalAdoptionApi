@@ -31,7 +31,7 @@ server:
 
 image-api:
   url: http://image-api:8082
-  url-images: http://image-api.barbershop-app.shop:8082
+  url-images: 
 keycloak-config:
   client-public-key: ANIMAL_ADOPTION_CLIENT
   internal-url: https://keycloak:8443

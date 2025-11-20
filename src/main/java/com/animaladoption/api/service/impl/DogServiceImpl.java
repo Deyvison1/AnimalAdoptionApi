@@ -8,6 +8,8 @@ import com.animaladoption.api.dto.animal.ImageDTO;
 import com.animaladoption.api.dto.dog.DogFilterDTO;
 import com.animaladoption.api.repository.specification.DogSpecification;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -87,7 +89,9 @@ public class DogServiceImpl implements IDogService {
     private ImageDTO monthImg(UUID id) {
         try {
             ImageDTO img = imageClient.getImage(id);
-            img.setUrl(baseUrlImage + img.getUrl());
+            if (Strings.isNotBlank(baseUrlImage)) {
+                img.setUrl(baseUrlImage + img.getUrl());
+            }
             return img;
         } catch (Exception e) {
             log.error(e.getMessage());
