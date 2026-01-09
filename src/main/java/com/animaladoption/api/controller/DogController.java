@@ -37,6 +37,23 @@ public class DogController {
 	public ResponseEntity<DogDTO> findById(@PathVariable UUID id) {
 		return ResponseEntity.ok(service.findByIdDTO(id));
 	}
+	
+	@GetMapping("/is-publish/{id}")
+	@PreAuthorize(DogConstants.ADMIN_PUBLISH_AUTHORITY)
+	@ApiResponse(responseCode = "200", description = DogConstants.IS_PUBLISH)
+	public ResponseEntity<Void> isPublish(@PathVariable UUID id) {
+		service.isPublish(id);
+		return ResponseEntity.noContent().build();
+	}
+	
+	@GetMapping("/not-publish/{id}")
+	@PreAuthorize(DogConstants.ADMIN_PUBLISH_AUTHORITY)
+	@ApiResponse(responseCode = "200", description = DogConstants.NOT_PUBLISH)
+	public ResponseEntity<Void> notPublish(@PathVariable UUID id) {
+		service.notPublish(id);
+		return ResponseEntity.noContent().build();
+	}
+
 
 	@GetMapping
 	@PreAuthorize(DogConstants.ADMIN_READ_AUTHORITY)

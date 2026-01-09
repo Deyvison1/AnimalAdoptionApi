@@ -39,6 +39,7 @@ public abstract class Animal extends BaseEntity {
 	private String name;
 	private String description;
 	private Integer age;
+	private Boolean published;
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "breed_id")
 	private Breed breed;

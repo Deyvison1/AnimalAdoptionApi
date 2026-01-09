@@ -5,273 +5,256 @@ import java.util.stream.Collectors;
 
 import com.animaladoption.api.client.IImageClient;
 import com.animaladoption.api.dto.animal.ImageDTO;
-import com.animaladoption.api.dto.dog.DogFilterDTO;
 import com.animaladoption.api.repository.specification.DogSpecification;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.animaladoption.api.dto.ContactDTO;
 import com.animaladoption.api.dto.breed.BreedDTO;
-import com.animaladoption.api.dto.dog.DogCreateDTO;
-import com.animaladoption.api.dto.dog.DogDTO;
-import com.animaladoption.api.dto.dog.DogUpdateDTO;
+import com.animaladoption.api.dto.dog.*;
 import com.animaladoption.api.exception.NotFoundException;
-import com.animaladoption.api.mapper.IBreedMapper;
-import com.animaladoption.api.mapper.IContactMapper;
-import com.animaladoption.api.mapper.IDogMapper;
-import com.animaladoption.api.model.Animal;
-import com.animaladoption.api.model.Breed;
-import com.animaladoption.api.model.Contact;
-import com.animaladoption.api.model.Dog;
+import com.animaladoption.api.exception.NotPublishException;
+import com.animaladoption.api.mapper.*;
+import com.animaladoption.api.model.*;
 import com.animaladoption.api.repository.IDogRepository;
 import com.animaladoption.api.service.IBreedService;
 import com.animaladoption.api.service.IDogService;
-import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DogServiceImpl implements IDogService {
-    private final IDogRepository repo;
-    private final IDogMapper mapper;
-    private final IBreedService breedService;
-    private final IBreedMapper breedMapper;
-    private final IContactMapper contactMapper;
-    private final IImageClient imageClient;
 
-    @Value("${image-api.url}")
-    private String imageApiBaseUrl;
-    
-    @Value("${image-api.url-images}")
-    private String baseUrlImage;
-    /**
-     * Retorna uma página de cães.
-     *
-     * @param page informações de paginação
-     * @param filter informações dos filtros
-     * @return página contendo DogDTO
-     */
-    @Override
-    @Transactional
-    public Page<DogDTO> findAll(Pageable page, DogFilterDTO filter) {
-        Specification<Dog> spec = DogSpecification.filterBy(filter);
+	private final IDogRepository repo;
+	private final IDogMapper mapper;
+	private final IBreedService breedService;
+	private final IBreedMapper breedMapper;
+	private final IContactMapper contactMapper;
+	private final IImageClient imageClient;
 
-        Pageable pageableRequest = PageRequest.of(page.getPageNumber(), page.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "createdDate"));
+	@Value("${image-api.url-images}")
+	private String baseUrlImage;
 
-        Page<Dog> dogs = repo.findAll(spec, pageableRequest);
+	/*
+	 * ------------------------------------------------------------- LISTAGEM DE
+	 * CÃES -------------------------------------------------------------
+	 */
 
-        return dogs.map(dog -> {
-            DogDTO dto = mapper.toDto(dog);
+	@Override
+	@Transactional(readOnly = true)
+	public Page<DogDTO> findAll(Pageable page, DogFilterDTO filter) {
+		return findDogs(page, filter, false);
+	}
 
-            if (dto.getImages() != null && !dto.getImages().isEmpty()) {
-                List<ImageDTO> imageDTOs = dto.getImages().stream()
-                        .map(this::monthImg)
-                        .collect(Collectors.toList());
+	@Override
+	@Transactional(readOnly = true)
+	public Page<DogDTO> findAllByAvaliableAndPublishIsTrue(Pageable page, DogFilterDTO filter) {
+		return findDogs(page, filter, true);
+	}
 
-                dto.setImagesComplet(imageDTOs);
-            }
+	private Page<DogDTO> findDogs(Pageable page, DogFilterDTO filter, boolean onlyActive) {
 
-            return dto;
-        });
-    }
+		Specification<Dog> spec = Specification.where(null);
 
-    private ImageDTO monthImg(UUID id) {
-        try {
-            ImageDTO img = imageClient.getImage(id);
-            if (Strings.isNotBlank(baseUrlImage)) {
-                img.setUrl(baseUrlImage + img.getUrl());
-            }
-            return img;
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new NotFoundException(e.getMessage());
-        }
-    }
+		// 1. Se precisa filtrar apenas ativos
+		if (onlyActive) {
+			spec = spec.and(DogSpecification.onlyAvailableAndPublished());
+		}
 
+		// 2. Aplica os filtros enviados
+		if (filter != null) {
+			spec = spec.and(DogSpecification.filterBy(filter));
+		}
 
-    /**
-     * Cria um novo cão.
-     *
-     * @param dto dados para criação
-     * @return DTO do cão criado
-     */
-    @Override
-    @Transactional
-    public DogDTO add(DogCreateDTO dto) {
-        Dog entity = setRequestCreate(dto);
-        return mapper.toDto(repo.save(entity));
-    }
+		// 3. Paginação + ordenação
+		Pageable pageableRequest = PageRequest.of(page.getPageNumber(), page.getPageSize(),
+				Sort.by(Sort.Direction.DESC, "createdDate"));
 
-    /**
-     * Atualiza um cão existente.
-     *
-     * @param id  identificador do cão
-     * @param dto dados atualizados
-     * @return DTO atualizado
-     * @throws NotFoundException se o cão não for encontrado
-     */
-    @Override
-    @Transactional
-    public DogDTO update(UUID id, DogUpdateDTO dto) {
-        Dog entity = findById(id);
-        DogDTO dtoMapped = setRequestUpdate(dto);
+		// 4. Busca
+		Page<Dog> dogs = repo.findAll(spec, pageableRequest);
 
-        updateBasicFields(entity, dtoMapped);
+		// 5. Conversão
+		return dogs.map(this::convertToDtoWithImages);
+	}
 
-        if (Objects.nonNull(dto.getContacts())) {
-            setContactsToUpdate(entity.getContacts(), dto.getContacts(), entity);
-        }
+	private DogDTO convertToDtoWithImages(Dog dog) {
+		DogDTO dto = mapper.toDto(dog);
 
-        return mapper.toDto(repo.save(entity));
-    }
+		if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+			dto.setImagesComplet(dto.getImages().stream().map(this::loadImageDTO).collect(Collectors.toList()));
+		}
 
-    /**
-     * Remove um cão pelo ID.
-     *
-     * @param id identificador do cão
-     * @throws NotFoundException se o cão não for encontrado
-     */
-    @Override
-    @Transactional
-    public void delete(UUID id) {
-        Dog entity = findById(id);
-        repo.delete(entity);
-    }
+		return dto;
+	}
 
-    /**
-     * Busca um cão pelo ID e retorna como DTO.
-     *
-     * @param id identificador do cão
-     * @return DTO do cão encontrado
-     * @throws NotFoundException se o cão não for encontrado
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public DogDTO findByIdDTO(UUID id) {
-        Dog dog = findById(id);
-        DogDTO dto = mapper.toDto(dog);
+	private ImageDTO loadImageDTO(UUID id) {
+		try {
+			ImageDTO img = imageClient.getImage(id);
 
-        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
-            List<ImageDTO> imageDTOs = dto.getImages().stream()
-                    .map(this::monthImg)
-                    .collect(Collectors.toList());
+			if (Strings.isNotBlank(baseUrlImage)) {
+				img.setUrl(baseUrlImage + img.getUrl());
+			}
+			return img;
 
-            dto.setImagesComplet(imageDTOs);
-        }
+		} catch (Exception e) {
+			log.error("Erro ao carregar imagem {}: {}", id, e.getMessage());
+			throw new NotFoundException("Imagem não encontrada: " + id);
+		}
+	}
 
-        return dto;
-    }
+	/*
+	 * ------------------------------------------------------------- CRUD
+	 * -------------------------------------------------------------
+	 */
 
+	@Override
+	@Transactional
+	public DogDTO add(DogCreateDTO dto) {
+		Dog entity = prepareCreateEntity(dto);
+		return mapper.toDto(repo.save(entity));
+	}
 
-    /**
-     * Mapeia dados do DTO de atualização para o DTO do mapper
-     */
-    private DogDTO setRequestUpdate(DogUpdateDTO dto) {
-        DogDTO dtoMapped = mapper.updateToDto(dto);
+	@Override
+	@Transactional
+	public DogDTO update(UUID id, DogUpdateDTO dto) {
+		Dog entity = findById(id);
+		DogDTO dtoMapped = mapUpdateToDto(dto);
 
-        BreedDTO breedDTO = breedService.findByIdToDto(dto.getBreedId());
-        dtoMapped.setBreed(BreedDTO.builder()
-                .id(breedDTO.getId())
-                .name(breedDTO.getName())
-                .build());
+		updateBasicFields(entity, dtoMapped);
 
-        return dtoMapped;
-    }
+		if (dto.getContacts() != null) {
+			updateContacts(entity, dto.getContacts());
+		}
 
-    /**
-     * Atualiza ou cria contatos associados ao Animal
-     */
-    private void setContactsToUpdate(Set<Contact> entities, Set<ContactDTO> dtos, Animal animal) {
+		return mapper.toDto(repo.save(entity));
+	}
 
-        Map<UUID, Contact> existingById = entities.stream()
-                .filter(e -> Objects.nonNull(e.getId()))
-                .collect(Collectors.toMap(Contact::getId, e -> e));
+	@Override
+	@Transactional
+	public void delete(UUID id) {
+		repo.delete(findById(id));
+	}
 
-        Set<Contact> updatedEntities = dtos.stream()
-                .map(dto -> {
-                    Contact entity = Optional.ofNullable(dto.getId())
-                            .map(existingById::get)
-                            .orElseGet(Contact::new);
+	@Override
+	@Transactional(readOnly = true)
+	public DogDTO findByIdDTO(UUID id) {
+		return convertToDtoWithImages(findById(id));
+	}
 
-                    if (isChangeContact(entity, dto)) {
-                        entity.setName(dto.getName());
-                        entity.setValue(dto.getValue());
-                    }
+	/*
+	 * ------------------------------------------------------------- MAPEAMENTO /
+	 * PREPARAÇÃO DE ENTIDADES
+	 * -------------------------------------------------------------
+	 */
 
-                    entity.setAnimal(animal);
+	private Dog prepareCreateEntity(DogCreateDTO dto) {
+		Dog entity = mapper.createToEntity(dto);
 
-                    return entity;
-                })
-                .collect(Collectors.toSet());
+		entity.setBreed(loadBreed(dto.getBreedId()));
 
-        entities.clear();
-        entities.addAll(updatedEntities);
-    }
+		Set<Contact> contacts = contactMapper.toEntitySet(dto.getContacts());
+		if (contacts != null) {
+			contacts.forEach(c -> c.setAnimal(entity));
+		}
+		entity.setContacts(contacts);
 
-    /**
-     * Verifica se houve alteração no contato
-     */
-    private boolean isChangeContact(Contact entity, ContactDTO dto) {
-        if (Objects.isNull(entity) || Objects.isNull(dto)) return true;
-        return !Objects.equals(entity.getName(), dto.getName()) ||
-               !Objects.equals(entity.getValue(), dto.getValue());
-    }
+		return entity;
+	}
 
-    /**
-     * Cria entidade Dog a partir de DTO de criação
-     */
-    private Dog setRequestCreate(DogCreateDTO dto) {
-        Dog entity = mapper.createToEntity(dto);
+	private DogDTO mapUpdateToDto(DogUpdateDTO dto) {
+		DogDTO mapped = mapper.updateToDto(dto);
+		mapped.setBreed(loadBreedDto(dto.getBreedId()));
+		return mapped;
+	}
 
-        BreedDTO breedDTO = breedService.findByIdToDto(dto.getBreedId());
-        entity.setBreed(Breed.builder()
-                .id(breedDTO.getId())
-                .name(breedDTO.getName())
-                .build());
+	private Breed loadBreed(UUID id) {
+		BreedDTO dto = breedService.findByIdToDto(id);
+		return Breed.builder().id(dto.getId()).name(dto.getName()).build();
+	}
 
-        Set<Contact> contacts = contactMapper.toEntitySet(dto.getContacts());
-        if (Objects.nonNull(contacts)) {
-            contacts.forEach(contact -> contact.setAnimal(entity));
-        }
-        entity.setContacts(contacts);
+	private BreedDTO loadBreedDto(UUID id) {
+		BreedDTO dto = breedService.findByIdToDto(id);
+		return BreedDTO.builder().id(dto.getId()).name(dto.getName()).build();
+	}
 
-        return entity;
-    }
+	private void updateBasicFields(Dog entity, DogDTO dto) {
+		Optional.ofNullable(dto.getName()).filter(n -> !n.equals(entity.getName())).ifPresent(entity::setName);
 
-    /**
-     * Atualiza campos básicos de Dog
-     */
-    private void updateBasicFields(Dog entity, DogDTO dto) {
-        if (Objects.nonNull(dto.getName()) && !dto.getName().equals(entity.getName())) {
-            entity.setName(dto.getName());
-        }
+		Optional.ofNullable(dto.getAge()).filter(a -> !a.equals(entity.getAge())).ifPresent(entity::setAge);
 
-        if (Objects.nonNull(dto.getAge()) && !dto.getAge().equals(entity.getAge())) {
-            entity.setAge(dto.getAge());
-        }
+		if (!entity.getBreed().getId().equals(dto.getBreed().getId())) {
+			entity.setBreed(breedMapper.toEntity(dto.getBreed()));
+		}
 
-        if (!entity.getBreed().getId().equals(dto.getBreed().getId())) {
-            entity.setBreed(breedMapper.toEntity(dto.getBreed()));
-        }
+		entity.setAvailable(dto.getAvailable());
+	}
 
-        entity.setAvailable(dto.getAvailable());
-    }
+	/*
+	 * ------------------------------------------------------------- CONTATOS
+	 * -------------------------------------------------------------
+	 */
+	private void updateContacts(Dog entity, Set<ContactDTO> contactDTOs) {
+		Map<UUID, Contact> existing = entity.getContacts().stream().filter(c -> c.getId() != null)
+				.collect(Collectors.toMap(Contact::getId, c -> c));
 
-    /**
-     * Busca Dog pelo ID ou lança NotFoundException
-     */
-    private Dog findById(UUID id) {
-        return repo.findById(id).orElseThrow(() -> new NotFoundException(id.toString()));
-    }
+		Set<Contact> updated = contactDTOs.stream().map(dto -> updateOrCreateContact(dto, existing, entity))
+				.collect(Collectors.toSet());
+
+		entity.getContacts().clear();
+		entity.getContacts().addAll(updated);
+	}
+
+	private Contact updateOrCreateContact(ContactDTO dto, Map<UUID, Contact> existing, Animal animal) {
+		Contact entity = Optional.ofNullable(dto.getId()).map(existing::get).orElseGet(Contact::new);
+
+		if (contactHasChanged(entity, dto)) {
+			entity.setName(dto.getName());
+			entity.setValue(dto.getValue());
+		}
+
+		entity.setAnimal(animal);
+		return entity;
+	}
+
+	private boolean contactHasChanged(Contact entity, ContactDTO dto) {
+		return !Objects.equals(entity.getName(), dto.getName()) || !Objects.equals(entity.getValue(), dto.getValue());
+	}
+
+	/*
+	 * ------------------------------------------------------------- UTIL
+	 * -------------------------------------------------------------
+	 */
+
+	private Dog findById(UUID id) {
+		return repo.findById(id).orElseThrow(() -> new NotFoundException("Dog não encontrado: " + id));
+	}
+
+	@Override
+	@Transactional
+	public void isPublish(UUID id) {
+		Dog entity = findById(id);
+		if(!entity.getAvailable()) {
+			throw new NotPublishException(400, "Somente animais disponiveis podem ser publicados.");
+		}
+		
+		entity.setPublished(Boolean.TRUE);
+		repo.save(entity);
+	}
+
+	@Override
+	@Transactional
+	public void notPublish(UUID id) {
+		Dog entity = findById(id);
+		
+		entity.setPublished(Boolean.FALSE);
+		repo.save(entity);
+	}
 }

@@ -26,6 +26,7 @@ public abstract class AnimalDTO extends BaseDTO {
 	private String name;
 	private String description;
 	private Integer age;
+	private Boolean published;
 	private BreedDTO breed;
 	private List<UUID> images;
     private List<ImageDTO> imagesComplet;

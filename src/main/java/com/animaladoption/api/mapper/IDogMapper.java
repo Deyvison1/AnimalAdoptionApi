@@ -30,6 +30,7 @@ public interface IDogMapper extends IBaseMapper<Dog, DogDTO> {
 	@Mapping(target = "lastModifiedBy", ignore = true)
 	@Mapping(target = "lastModifiedDate", ignore = true)
 	@Mapping(target = "images", ignore = true)
+	@Mapping(target = "imagesComplet", ignore = true)
 	@Mapping(target = "contacts", source = "contacts")
 	DogDTO updateToDto(DogUpdateDTO dto);
 }

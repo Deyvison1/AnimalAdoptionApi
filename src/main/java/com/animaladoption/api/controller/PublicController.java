@@ -30,7 +30,7 @@ public class PublicController {
 	public ResponseEntity<Page<DogDTO>> findAll(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, @ModelAttribute DogFilterDTO filter) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<DogDTO> resp = dogService.findAll(pageable, filter);
+        Page<DogDTO> resp = dogService.findAllByAvaliableAndPublishIsTrue(pageable, filter);
         return ResponseEntity.ok(resp);
 	}
 }

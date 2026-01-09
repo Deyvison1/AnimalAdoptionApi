@@ -19,4 +19,8 @@ public interface IDogService {
 	DogDTO add(DogCreateDTO dto);
 
 	DogDTO update(UUID id, DogUpdateDTO dto);
+	Page<DogDTO> findAllByAvaliableAndPublishIsTrue(Pageable page, DogFilterDTO filter);
+	
+	void isPublish(UUID id);
+	void notPublish(UUID id);
 }

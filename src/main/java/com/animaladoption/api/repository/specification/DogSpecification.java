@@ -52,6 +52,14 @@ public class DogSpecification {
             return cb.between(root.get("age"), minAge, maxAge);
         };
     }
+    
+    public static Specification<Dog> onlyAvailableAndPublished() {
+        return (root, query, cb) -> cb.and(
+            cb.isTrue(root.get("available")),
+            cb.isTrue(root.get("published"))
+        );
+    }
+
 
     private static Specification<Dog> hasContactValue(String contactValue) {
         return (root, query, cb) -> {
