@@ -126,6 +126,7 @@ public class DogServiceImpl implements IDogService {
 	@Transactional
 	public DogDTO update(UUID id, DogUpdateDTO dto) {
 		Dog entity = findById(id);
+		avaliableAndPublished(dto, entity);
 		DogDTO dtoMapped = mapUpdateToDto(dto);
 
 		updateBasicFields(entity, dtoMapped);
@@ -135,6 +136,12 @@ public class DogServiceImpl implements IDogService {
 		}
 
 		return mapper.toDto(repo.save(entity));
+	}
+	
+	private void avaliableAndPublished(DogUpdateDTO dto, Dog entity) {
+		if(!dto.getAvailable() && entity.getPublished()) {
+			entity.setPublished(Boolean.FALSE);
+		}
 	}
 
 	@Override
@@ -159,6 +166,7 @@ public class DogServiceImpl implements IDogService {
 		Dog entity = mapper.createToEntity(dto);
 
 		entity.setBreed(loadBreed(dto.getBreedId()));
+		entity.setPublished(Boolean.FALSE);
 
 		Set<Contact> contacts = contactMapper.toEntitySet(dto.getContacts());
 		if (contacts != null) {

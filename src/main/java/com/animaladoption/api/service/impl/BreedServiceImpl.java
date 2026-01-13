@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.animaladoption.api.dto.breed.BreedDTO;
 import com.animaladoption.api.exception.NotFoundException;
+import com.animaladoption.api.mapper.IAnimalTypeMapper;
 import com.animaladoption.api.mapper.IBreedMapper;
 import com.animaladoption.api.model.Breed;
 import com.animaladoption.api.repository.IBreedRepository;
@@ -22,6 +23,7 @@ public class BreedServiceImpl implements IBreedService {
 
     private final IBreedRepository repo;
     private final IBreedMapper mapper;
+    private final IAnimalTypeMapper animalTypeMapper;
 
     /**
      * Retorna uma página de raças.
@@ -95,6 +97,10 @@ public class BreedServiceImpl implements IBreedService {
 			
 			if(Objects.nonNull(entity.getNationality()) && Objects.nonNull(dto.getNationality()) && !entity.getNationality().equals(dto.getNationality())) {
 				entity.setNationality(dto.getNationality());
+			}
+			
+			if(Objects.nonNull(entity.getType()) && Objects.nonNull(dto.getType()) && !entity.getType().getName().equals(dto.getType().getName())) {
+				entity.setType(animalTypeMapper.toEntity(dto.getType()));
 			}
 		}
 	}
