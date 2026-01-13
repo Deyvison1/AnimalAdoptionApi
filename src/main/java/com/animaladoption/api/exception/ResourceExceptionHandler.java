@@ -24,6 +24,19 @@ public class ResourceExceptionHandler {
 	public ResponseEntity<ErrorResponseDTO> handleNotFoundException(NotFoundException ex, HttpServletRequest request) {
 		return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
 	}
+	
+	@ExceptionHandler(NotPublishException.class)
+	public ResponseEntity<ErrorResponseDTO> handleBusinessRuleException(
+			NotPublishException ex,
+	        HttpServletRequest request) {
+
+	    HttpStatus status = HttpStatus.resolve(ex.getStatus());
+	    if (status == null) {
+	        status = HttpStatus.BAD_REQUEST;
+	    }
+
+	    return buildResponse(status, ex.getMessage(), request.getRequestURI());
+	}
 
 	@ExceptionHandler(DataIntegrityViolationException.class)
 	public ResponseEntity<ErrorResponseDTO> handleDataIntegrityViolation(DataIntegrityViolationException ex,

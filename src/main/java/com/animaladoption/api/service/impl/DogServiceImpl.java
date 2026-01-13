@@ -137,9 +137,9 @@ public class DogServiceImpl implements IDogService {
 
 		return mapper.toDto(repo.save(entity));
 	}
-	
+
 	private void avaliableAndPublished(DogUpdateDTO dto, Dog entity) {
-		if(!dto.getAvailable() && entity.getPublished()) {
+		if (!dto.getAvailable() && entity.getPublished()) {
 			entity.setPublished(Boolean.FALSE);
 		}
 	}
@@ -147,7 +147,15 @@ public class DogServiceImpl implements IDogService {
 	@Override
 	@Transactional
 	public void delete(UUID id) {
-		repo.delete(findById(id));
+		Dog entity = findById(id);
+		isDeleteDogIsPublished(entity);
+		repo.delete(entity);
+	}
+
+	private void isDeleteDogIsPublished(Dog entity) {
+		if (entity.getPublished()) {
+			throw new NotPublishException(409, "Não e possivel excluir um animal que já está publicado");
+		}
 	}
 
 	@Override
@@ -249,10 +257,10 @@ public class DogServiceImpl implements IDogService {
 	@Transactional
 	public void isPublish(UUID id) {
 		Dog entity = findById(id);
-		if(!entity.getAvailable()) {
+		if (!entity.getAvailable()) {
 			throw new NotPublishException(400, "Somente animais disponiveis podem ser publicados.");
 		}
-		
+
 		entity.setPublished(Boolean.TRUE);
 		repo.save(entity);
 	}
@@ -261,7 +269,7 @@ public class DogServiceImpl implements IDogService {
 	@Transactional
 	public void notPublish(UUID id) {
 		Dog entity = findById(id);
-		
+
 		entity.setPublished(Boolean.FALSE);
 		repo.save(entity);
 	}
