@@ -47,6 +47,7 @@ public abstract class Animal extends BaseEntity {
 	private StatusAnimal status;
 	@Column(name = "date_update_status")
 	private LocalDateTime dateUpdateStatus;
+	private String motivo;
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "breed_id")
 	private Breed breed;

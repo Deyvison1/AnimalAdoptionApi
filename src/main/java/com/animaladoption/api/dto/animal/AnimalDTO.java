@@ -30,6 +30,7 @@ public abstract class AnimalDTO extends BaseDTO {
 	private Integer age;
 	private StatusAnimal status;
 	private LocalDateTime dateUpdateStatus;
+	private String motivo;
 	private BreedDTO breed;
 	private List<UUID> images;
     private List<ImageDTO> imagesComplet;

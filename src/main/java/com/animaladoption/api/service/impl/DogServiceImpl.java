@@ -254,10 +254,14 @@ public class DogServiceImpl implements IDogService {
 
 	@Override
 	@Transactional
-	public void notPublish(UUID id) {
+	public void notPublish(UUID id, String motivo) {
 		Dog entity = findById(id);
+		if(Strings.isBlank(motivo)) {
+			throw new NotPublishException(400, "Não e possivel despublicar algum animal sem justificar o motivo.");
+		}
 
 		entity.setStatus(StatusAnimal.DESPUBLICADO);
+		entity.setMotivo(motivo);
 		repo.save(entity);
 	}
 }

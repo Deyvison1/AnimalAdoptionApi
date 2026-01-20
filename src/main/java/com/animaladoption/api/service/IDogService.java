@@ -22,5 +22,5 @@ public interface IDogService {
 	Page<DogDTO> findAllByAvaliableAndPublishIsTrue(Pageable page, DogFilterDTO filter);
 	
 	void isPublish(UUID id);
-	void notPublish(UUID id);
+	void notPublish(UUID id, String motivo);
 }

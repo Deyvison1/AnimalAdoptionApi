@@ -49,8 +49,8 @@ public class DogController {
 	@GetMapping("/not-publish/{id}")
 	@PreAuthorize(DogConstants.ADMIN_PUBLISH_AUTHORITY)
 	@ApiResponse(responseCode = "200", description = DogConstants.NOT_PUBLISH)
-	public ResponseEntity<Void> notPublish(@PathVariable UUID id) {
-		service.notPublish(id);
+	public ResponseEntity<Void> notPublish(@PathVariable UUID id, @RequestParam(value = "motivo", required = true) String motivo) {
+		service.notPublish(id, motivo);
 		return ResponseEntity.noContent().build();
 	}
 

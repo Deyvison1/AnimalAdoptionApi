@@ -19,7 +19,9 @@ public interface IDogMapper extends IBaseMapper<Dog, DogDTO> {
 	@Mapping(target = "lastModifiedDate", ignore = true)
 	@Mapping(target = "breed", ignore = true)
 	@Mapping(target = "images", ignore = true)
-	@Mapping(target = "description", source = "description")
+	@Mapping(target = "motivo", ignore = true)
+	@Mapping(target = "status", ignore = true)
+	@Mapping(target = "dateUpdateStatus", ignore = true)
 	@Mapping(target = "contacts", source = "contacts")
 	Dog createToEntity(DogCreateDTO dto);
 
@@ -30,6 +32,9 @@ public interface IDogMapper extends IBaseMapper<Dog, DogDTO> {
 	@Mapping(target = "lastModifiedBy", ignore = true)
 	@Mapping(target = "lastModifiedDate", ignore = true)
 	@Mapping(target = "images", ignore = true)
+	@Mapping(target = "motivo", ignore = true)
+	@Mapping(target = "status", ignore = true)
+	@Mapping(target = "dateUpdateStatus", ignore = true)
 	@Mapping(target = "imagesComplet", ignore = true)
 	@Mapping(target = "contacts", source = "contacts")
 	DogDTO updateToDto(DogUpdateDTO dto);
