@@ -8,18 +8,18 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
-# 👉 copia o certificado do Keycloak
+# 👉 copia o certificado
 COPY keycloak.crt /tmp/keycloak.crt
 
-# 👉 importa no truststore do Java
-RUN keytool -importcert \
-  -alias keycloak \
-  -file /tmp/keycloak.crt \
-  -keystore $JAVA_HOME/lib/security/cacerts \
-  -storepass changeit \
-  -noprompt
+# 👉 importa no truststore do Java CORRETO
+RUN /opt/java/openjdk/bin/keytool -importcert \
+    -alias keycloak \
+    -file /tmp/keycloak.crt \
+    -keystore /opt/java/openjdk/lib/security/cacerts \
+    -storepass changeit \
+    -noprompt
 
-# copia o JAR
+# copia o jar
 COPY --from=builder /app/target/animaladoption-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 8081
