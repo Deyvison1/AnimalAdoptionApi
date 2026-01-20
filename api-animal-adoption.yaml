@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: api-animal-adoption
-          image: docker.io/library/api_animal_adoption:latest
+          image: localhost/api_animal_adoption:latest
           imagePullPolicy: Never
           ports:
             - containerPort: 8081
