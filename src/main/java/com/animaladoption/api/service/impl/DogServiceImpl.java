@@ -1,5 +1,6 @@
 package com.animaladoption.api.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.animaladoption.api.dto.ContactDTO;
 import com.animaladoption.api.dto.breed.BreedDTO;
 import com.animaladoption.api.dto.dog.*;
+import com.animaladoption.api.enums.StatusAnimal;
 import com.animaladoption.api.exception.NotFoundException;
 import com.animaladoption.api.exception.NotPublishException;
 import com.animaladoption.api.mapper.*;
@@ -110,11 +112,6 @@ public class DogServiceImpl implements IDogService {
 		}
 	}
 
-	/*
-	 * ------------------------------------------------------------- CRUD
-	 * -------------------------------------------------------------
-	 */
-
 	@Override
 	@Transactional
 	public DogDTO add(DogCreateDTO dto) {
@@ -126,7 +123,6 @@ public class DogServiceImpl implements IDogService {
 	@Transactional
 	public DogDTO update(UUID id, DogUpdateDTO dto) {
 		Dog entity = findById(id);
-		avaliableAndPublished(dto, entity);
 		DogDTO dtoMapped = mapUpdateToDto(dto);
 
 		updateBasicFields(entity, dtoMapped);
@@ -138,12 +134,6 @@ public class DogServiceImpl implements IDogService {
 		return mapper.toDto(repo.save(entity));
 	}
 
-	private void avaliableAndPublished(DogUpdateDTO dto, Dog entity) {
-		if (!dto.getAvailable() && entity.getPublished()) {
-			entity.setPublished(Boolean.FALSE);
-		}
-	}
-
 	@Override
 	@Transactional
 	public void delete(UUID id) {
@@ -153,8 +143,12 @@ public class DogServiceImpl implements IDogService {
 	}
 
 	private void isDeleteDogIsPublished(Dog entity) {
-		if (entity.getPublished()) {
+		if (entity.getStatus() == StatusAnimal.PUBLISHED) {
 			throw new NotPublishException(409, "Não e possivel excluir um animal que já está publicado");
+		}
+		
+		if (entity.getStatus() == StatusAnimal.REPUBLISHED) {
+			throw new NotPublishException(409, "Não e possivel excluir um animal que está em republicação");
 		}
 	}
 
@@ -164,17 +158,12 @@ public class DogServiceImpl implements IDogService {
 		return convertToDtoWithImages(findById(id));
 	}
 
-	/*
-	 * ------------------------------------------------------------- MAPEAMENTO /
-	 * PREPARAÇÃO DE ENTIDADES
-	 * -------------------------------------------------------------
-	 */
 
 	private Dog prepareCreateEntity(DogCreateDTO dto) {
 		Dog entity = mapper.createToEntity(dto);
 
 		entity.setBreed(loadBreed(dto.getBreedId()));
-		entity.setPublished(Boolean.FALSE);
+		entity.setStatus(StatusAnimal.NOT_PUBLISHED);
 
 		Set<Contact> contacts = contactMapper.toEntitySet(dto.getContacts());
 		if (contacts != null) {
@@ -213,10 +202,6 @@ public class DogServiceImpl implements IDogService {
 		entity.setAvailable(dto.getAvailable());
 	}
 
-	/*
-	 * ------------------------------------------------------------- CONTATOS
-	 * -------------------------------------------------------------
-	 */
 	private void updateContacts(Dog entity, Set<ContactDTO> contactDTOs) {
 		Map<UUID, Contact> existing = entity.getContacts().stream().filter(c -> c.getId() != null)
 				.collect(Collectors.toMap(Contact::getId, c -> c));
@@ -244,11 +229,6 @@ public class DogServiceImpl implements IDogService {
 		return !Objects.equals(entity.getName(), dto.getName()) || !Objects.equals(entity.getValue(), dto.getValue());
 	}
 
-	/*
-	 * ------------------------------------------------------------- UTIL
-	 * -------------------------------------------------------------
-	 */
-
 	private Dog findById(UUID id) {
 		return repo.findById(id).orElseThrow(() -> new NotFoundException("Dog não encontrado: " + id));
 	}
@@ -257,11 +237,18 @@ public class DogServiceImpl implements IDogService {
 	@Transactional
 	public void isPublish(UUID id) {
 		Dog entity = findById(id);
+		
+		if (StatusAnimal.DESPUBLICADO == entity.getStatus()) {
+			entity.setStatus(StatusAnimal.REPUBLISHED);
+		} else if (StatusAnimal.NOT_PUBLISHED == entity.getStatus()) {
+			entity.setStatus(StatusAnimal.PUBLISHED);
+		}
+		
 		if (!entity.getAvailable()) {
 			throw new NotPublishException(400, "Somente animais disponiveis podem ser publicados.");
 		}
 
-		entity.setPublished(Boolean.TRUE);
+		entity.setDateUpdateStatus(LocalDateTime.now());
 		repo.save(entity);
 	}
 
@@ -270,7 +257,7 @@ public class DogServiceImpl implements IDogService {
 	public void notPublish(UUID id) {
 		Dog entity = findById(id);
 
-		entity.setPublished(Boolean.FALSE);
+		entity.setStatus(StatusAnimal.DESPUBLICADO);
 		repo.save(entity);
 	}
 }

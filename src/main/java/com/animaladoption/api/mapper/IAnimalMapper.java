@@ -14,27 +14,34 @@ import com.animaladoption.api.model.Dog;
 @Mapper(componentModel = "spring")
 public interface IAnimalMapper extends IBaseMapper<Animal, AnimalDTO> {
 
-	@Override
-	@Mapping(target = "images", ignore = true)
-	@SubclassMapping(source = DogDTO.class, target = Dog.class)
-	Animal toEntity(AnimalDTO dto);
+    @Override
+    @Mapping(target = "images", ignore = true)
+    @SubclassMapping(source = DogDTO.class, target = Dog.class)
+    Animal toEntity(AnimalDTO dto);
 
-	@Override
-	@Mapping(target = "images", ignore = true)
-	@SubclassMapping(source = Dog.class, target = DogDTO.class)
-	AnimalDTO toDto(Animal entity);
+    @Override
+    @Mapping(target = "images", ignore = true)
+    @Mapping(target = "imagesComplet", ignore = true)
+    @SubclassMapping(source = Dog.class, target = DogDTO.class)
+    AnimalDTO toDto(Animal entity);
 
-	@ObjectFactory
-	default Animal createEntity(AnimalDTO dto) {
-		if (dto instanceof DogDTO)
-			return new Dog();
-		throw new IllegalArgumentException("Tipo de AnimalDTO não suportado: " + dto.getClass());
-	}
+    @ObjectFactory
+    default Animal createEntity(AnimalDTO dto) {
+        if (dto instanceof DogDTO) {
+            return new Dog();
+        }
+        throw new IllegalArgumentException(
+            "Tipo de AnimalDTO não suportado: " + dto.getClass()
+        );
+    }
 
-	@ObjectFactory
-	default AnimalDTO createDto(Animal entity) {
-		if (entity instanceof Dog)
-			return new DogDTO();
-		throw new IllegalArgumentException("Tipo de Animal não suportado: " + entity.getClass());
-	}
+    @ObjectFactory
+    default AnimalDTO createDto(Animal entity) {
+        if (entity instanceof Dog) {
+            return new DogDTO();
+        }
+        throw new IllegalArgumentException(
+            "Tipo de Animal não suportado: " + entity.getClass()
+        );
+    }
 }

@@ -1,10 +1,13 @@
 package com.animaladoption.api.model;
 
 import java.io.Serial;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.animaladoption.api.converter.StatusAnimalConverter;
+import com.animaladoption.api.enums.StatusAnimal;
 import com.animaladoption.api.model.base.BaseEntity;
 import com.animaladoption.api.model.converter.UUIDListConverter;
 
@@ -39,7 +42,11 @@ public abstract class Animal extends BaseEntity {
 	private String name;
 	private String description;
 	private Integer age;
-	private Boolean published;
+	@Convert(converter = StatusAnimalConverter.class)
+	@Column(name = "status")
+	private StatusAnimal status;
+	@Column(name = "date_update_status")
+	private LocalDateTime dateUpdateStatus;
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "breed_id")
 	private Breed breed;

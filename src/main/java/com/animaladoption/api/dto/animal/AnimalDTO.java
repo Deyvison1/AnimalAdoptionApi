@@ -1,6 +1,7 @@
 package com.animaladoption.api.dto.animal;
 
 import java.io.Serial;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -8,6 +9,7 @@ import java.util.UUID;
 import com.animaladoption.api.dto.ContactDTO;
 import com.animaladoption.api.dto.base.BaseDTO;
 import com.animaladoption.api.dto.breed.BreedDTO;
+import com.animaladoption.api.enums.StatusAnimal;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,7 +28,8 @@ public abstract class AnimalDTO extends BaseDTO {
 	private String name;
 	private String description;
 	private Integer age;
-	private Boolean published;
+	private StatusAnimal status;
+	private LocalDateTime dateUpdateStatus;
 	private BreedDTO breed;
 	private List<UUID> images;
     private List<ImageDTO> imagesComplet;
