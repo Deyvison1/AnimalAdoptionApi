@@ -21,62 +21,52 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Value("${keycloak-config.client-public-key}")
-    private final String clientId = "myclient";
-    
-    @Bean
-    KeycloakJwtAuthenticationConverter keycloakJwtAuthenticationConverter() {
-        return new KeycloakJwtAuthenticationConverter(clientId);
-    }
+	@Value("${keycloak-config.client-public-key}")
+	private final String clientId = "myclient";
 
-    @Bean
-    JwtAuthenticationConverter jwtAuthenticationConverter(KeycloakJwtAuthenticationConverter keycloakConverter) {
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(keycloakConverter::convert);
-        return converter;
-    }
+	@Bean
+	KeycloakJwtAuthenticationConverter keycloakJwtAuthenticationConverter() {
+		return new KeycloakJwtAuthenticationConverter(clientId);
+	}
 
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        return getCorsConfigurationSource();
-    }
+	@Bean
+	JwtAuthenticationConverter jwtAuthenticationConverter(KeycloakJwtAuthenticationConverter keycloakConverter) {
+		JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+		converter.setJwtGrantedAuthoritiesConverter(keycloakConverter::convert);
+		return converter;
+	}
 
-    static CorsConfigurationSource getCorsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
-        configuration.setAllowCredentials(true);
+	@Bean
+	CorsConfigurationSource corsConfigurationSource() {
+		return getCorsConfigurationSource();
+	}
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+	static CorsConfigurationSource getCorsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(List.of("http://localhost:4200", "https://animal-adoption.com.br"));
+		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+		configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+		configuration.setAllowCredentials(true);
 
-        return source;
-    }
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
 
-    @Bean
-    SecurityFilterChain securityFilterChain(
-            HttpSecurity http,
-            @Qualifier("corsConfigurationSource") CorsConfigurationSource corsConfigurationSource,
-            JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/swagger-resources/**",
-                                "/webjars/**",
-                                "/public/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer(oauth -> oauth
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
-                );
+		return source;
+	}
 
-        return http.build();
-    }
+	@Bean
+	SecurityFilterChain securityFilterChain(HttpSecurity http,
+			@Qualifier("corsConfigurationSource") CorsConfigurationSource corsConfigurationSource,
+			JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+		http.csrf(AbstractHttpConfigurer::disable).cors(cors -> cors.configurationSource(corsConfigurationSource))
+				.authorizeHttpRequests(
+						auth -> auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+								.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**",
+										"/swagger-resources/**", "/webjars/**", "/public/**")
+								.permitAll().anyRequest().authenticated())
+				.oauth2ResourceServer(
+						oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+
+		return http.build();
+	}
 }
