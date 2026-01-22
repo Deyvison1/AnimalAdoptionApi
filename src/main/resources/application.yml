@@ -41,3 +41,4 @@ image-api:
 keycloak-config:
   client-public-key: ANIMAL_ADOPTION_CLIENT
   internal-url: https://keycloak.animal-adoption.com.br:8443
+  base-url: http://image-api:8082

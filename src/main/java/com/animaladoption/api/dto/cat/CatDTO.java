@@ -1,27 +1,22 @@
-package com.animaladoption.api.model;
+package com.animaladoption.api.dto.cat;
 
-import java.io.Serial;
+import com.animaladoption.api.dto.animal.AnimalDTO;
 
-import com.animaladoption.api.dto.constants.CatConstants;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-@Entity
-@Setter
+import java.io.Serial;
+
 @Getter
+@Setter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(schema = CatConstants.SCHEMA)
-public class Cat extends Animal {
-
-	@Serial
+public class CatDTO extends AnimalDTO {
+    @Serial
 	private static final long serialVersionUID = 1L;
 
 	private Boolean available;

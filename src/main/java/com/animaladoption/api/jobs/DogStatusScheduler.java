@@ -3,7 +3,7 @@ package com.animaladoption.api.jobs;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.animaladoption.api.service.DogStatusSchedulerService;
+import com.animaladoption.api.service.AnimalStatusSchedulerService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DogStatusScheduler {
 
-	private final DogStatusSchedulerService service;
+	private final AnimalStatusSchedulerService service;
 
 	@Scheduled(cron = "0 */10 * * * *")
 	public void run() {

@@ -1,5 +1,5 @@
 package com.animaladoption.api.service;
 
-public interface DogStatusSchedulerService {
+public interface AnimalStatusSchedulerService {
 	void processRepublishedAnimals();
 }
