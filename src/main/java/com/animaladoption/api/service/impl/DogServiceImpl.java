@@ -102,7 +102,7 @@ public class DogServiceImpl implements IDogService {
 			ImageDTO img = imageClient.getImage(id);
 
 			if (Strings.isNotBlank(baseUrlImage)) {
-				img.setUrl(baseUrlImage + img.getUrl());
+				img.setUrl(img.getUrl());
 			}
 			return img;
 

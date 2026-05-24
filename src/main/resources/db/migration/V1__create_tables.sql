@@ -1,6 +1,6 @@
 -- DROP SCHEMA animal_adoption;
 
-CREATE SCHEMA animal_adoption AUTHORIZATION postgres;
+CREATE SCHEMA IF NOT EXISTS animal_adoption AUTHORIZATION postgres;
 -- animal_adoption.animal_type definição
 
 -- Drop table

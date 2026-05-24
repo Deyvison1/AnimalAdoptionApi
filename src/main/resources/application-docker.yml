@@ -3,7 +3,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://keycloak.animal-adoption.com.br:8443/realms/ANIMAL_ADOPTION
+          issuer-uri: https://keycloak.animal-adoption.com.br:8443/realms/MY_KEYCLOAK
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/animal_adoption}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
@@ -38,5 +38,5 @@ image-api:
   url: http://image-api:8082
   url-images: 
 keycloak-config:
-  client-public-key: ANIMAL_ADOPTION_CLIENT
-  internal-url: https://keycloak:8443
+  client-id: ANIMAL_ADOPTION_CLIENT
+  client-secret: rb308smILPAIuMrKYBqF9XrLwAPLd4Xm
