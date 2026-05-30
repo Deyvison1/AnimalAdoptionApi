@@ -7,9 +7,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.animaladoption.api.dto.ContactDTO;
-import com.animaladoption.api.dto.base.BaseDTO;
 import com.animaladoption.api.dto.breed.BreedDTO;
 import com.animaladoption.api.enums.StatusAnimal;
+import com.shareddtos.dto.BaseDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,6 +33,6 @@ public abstract class AnimalDTO extends BaseDTO {
 	private String motivo;
 	private BreedDTO breed;
 	private List<UUID> images;
-    private List<ImageDTO> imagesComplet;
+	private List<ImageDTO> imagesComplet;
 	private Set<ContactDTO> contacts;
 }

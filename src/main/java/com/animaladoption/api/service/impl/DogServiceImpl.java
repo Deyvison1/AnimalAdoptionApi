@@ -78,7 +78,7 @@ public class DogServiceImpl implements IDogService {
 
 		// 3. Paginação + ordenação
 		Pageable pageableRequest = PageRequest.of(page.getPageNumber(), page.getPageSize(),
-				Sort.by(Sort.Direction.DESC, "createdDate"));
+				Sort.by(Sort.Direction.DESC, "creationDate"));
 
 		// 4. Busca
 		Page<Dog> dogs = repo.findAll(spec, pageableRequest);
@@ -101,9 +101,10 @@ public class DogServiceImpl implements IDogService {
 		try {
 			ImageDTO img = imageClient.getImage(id);
 
-			if (Strings.isNotBlank(baseUrlImage)) {
-				img.setUrl(img.getUrl());
-			}
+			String url = imageClient.getImageUrl(id);
+
+			img.setUrl(url);
+
 			return img;
 
 		} catch (Exception e) {
@@ -146,7 +147,7 @@ public class DogServiceImpl implements IDogService {
 		if (entity.getStatus() == StatusAnimal.PUBLISHED) {
 			throw new NotPublishException(409, "Não e possivel excluir um animal que já está publicado");
 		}
-		
+
 		if (entity.getStatus() == StatusAnimal.REPUBLISHED) {
 			throw new NotPublishException(409, "Não e possivel excluir um animal que está em republicação");
 		}
@@ -157,7 +158,6 @@ public class DogServiceImpl implements IDogService {
 	public DogDTO findByIdDTO(UUID id) {
 		return convertToDtoWithImages(findById(id));
 	}
-
 
 	private Dog prepareCreateEntity(DogCreateDTO dto) {
 		Dog entity = mapper.createToEntity(dto);
@@ -237,13 +237,13 @@ public class DogServiceImpl implements IDogService {
 	@Transactional
 	public void isPublish(UUID id) {
 		Dog entity = findById(id);
-		
+
 		if (StatusAnimal.DESPUBLICADO == entity.getStatus()) {
 			entity.setStatus(StatusAnimal.REPUBLISHED);
 		} else if (StatusAnimal.NOT_PUBLISHED == entity.getStatus()) {
 			entity.setStatus(StatusAnimal.PUBLISHED);
 		}
-		
+
 		if (!entity.getAvailable()) {
 			throw new NotPublishException(400, "Somente animais disponiveis podem ser publicados.");
 		}
@@ -256,7 +256,7 @@ public class DogServiceImpl implements IDogService {
 	@Transactional
 	public void notPublish(UUID id, String motivo) {
 		Dog entity = findById(id);
-		if(Strings.isBlank(motivo)) {
+		if (Strings.isBlank(motivo)) {
 			throw new NotPublishException(400, "Não e possivel despublicar algum animal sem justificar o motivo.");
 		}
 

@@ -1,7 +1,5 @@
 package com.animaladoption.api.dto.animal;
 
-import com.animaladoption.api.dto.base.BaseDTO;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,17 +8,19 @@ import lombok.experimental.SuperBuilder;
 
 import java.io.Serial;
 
+import com.shareddtos.dto.BaseDTO;
+
 @Getter
 @Setter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImageDTO extends BaseDTO {
-    @Serial
-    private static final long serialVersionUID = 1L;
-    private String filename;
-    private String url;
-    private String contentType;
-    private Long size;
-    private Boolean active;
+	@Serial
+	private static final long serialVersionUID = 1L;
+	private String filename;
+	private String url;
+	private String contentType;
+	private Long size;
+	private Boolean active;
 }

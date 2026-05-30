@@ -3,7 +3,8 @@ package com.animaladoption.api.dto.breed;
 import java.io.Serial;
 
 import com.animaladoption.api.dto.animal.AnimalTypeDTO;
-import com.animaladoption.api.dto.base.BaseDTO;
+import com.shareddtos.dto.BaseDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -8,11 +8,11 @@ CREATE SCHEMA IF NOT EXISTS animal_adoption AUTHORIZATION postgres;
 -- DROP TABLE animal_adoption.animal_type;
 
 CREATE TABLE animal_adoption.animal_type (
-	created_date timestamp(6) NULL,
-	last_modified_date timestamp(6) NULL,
+	creation_Date timestamp(6),
+    update_date timestamp(6),
+    creation_user varchar(255),
+    update_user varchar(255),
 	id uuid NOT NULL,
-	created_by varchar(255) NULL,
-	last_modified_by varchar(255) NULL,
 	"name" varchar(255) NULL,
 	CONSTRAINT animal_type_pkey PRIMARY KEY (id)
 );
@@ -30,12 +30,12 @@ GRANT ALL ON TABLE animal_adoption.animal_type TO postgres;
 -- DROP TABLE animal_adoption.breed;
 
 CREATE TABLE animal_adoption.breed (
-	created_date timestamp(6) NULL,
-	last_modified_date timestamp(6) NULL,
+    creation_Date timestamp(6),
+    update_date timestamp(6),
+    creation_user varchar(255),
+    update_user varchar(255),
 	animal_type_id uuid NOT NULL,
 	id uuid NOT NULL,
-	created_by varchar(255) NULL,
-	last_modified_by varchar(255) NULL,
 	"name" varchar(255) NULL,
 	nationality varchar(255) NULL,
 	CONSTRAINT breed_pkey PRIMARY KEY (id),
@@ -56,14 +56,14 @@ GRANT ALL ON TABLE animal_adoption.breed TO postgres;
 
 CREATE TABLE animal_adoption.animal (
 	age int4 NULL,
-	created_date timestamp(6) NULL,
-	last_modified_date timestamp(6) NULL,
+	creation_Date timestamp(6),
+    update_date timestamp(6),
+    creation_user varchar(255),
+    update_user varchar(255),
 	breed_id uuid NOT NULL,
 	id uuid NOT NULL,
-	created_by varchar(255) NULL,
 	description varchar(255) NULL,
 	images text NULL,
-	last_modified_by varchar(255) NULL,
 	"name" varchar(255) NULL,
 	CONSTRAINT animal_pkey PRIMARY KEY (id),
 	CONSTRAINT fk5vuppijm6mptl6xm5g9jhegwh FOREIGN KEY (breed_id) REFERENCES animal_adoption.breed(id)
@@ -101,12 +101,12 @@ GRANT ALL ON TABLE animal_adoption.cat TO postgres;
 -- DROP TABLE animal_adoption.contact;
 
 CREATE TABLE animal_adoption.contact (
-	created_date timestamp(6) NULL,
-	last_modified_date timestamp(6) NULL,
+    creation_Date timestamp(6),
+    update_date timestamp(6),
+    creation_user varchar(255),
+    update_user varchar(255),
 	animal_id uuid NULL,
 	id uuid NOT NULL,
-	created_by varchar(255) NULL,
-	last_modified_by varchar(255) NULL,
 	"name" varchar(255) NULL,
 	value varchar(255) NULL,
 	CONSTRAINT contact_pkey PRIMARY KEY (id),

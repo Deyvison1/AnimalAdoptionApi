@@ -7,13 +7,15 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import com.animaladoption.api.dto.ContactDTO;
-import com.animaladoption.api.mapper.base.IBaseMapper;
 import com.animaladoption.api.model.Contact;
+import com.shareddtos.mapper.IBaseMapper;
 
-@Mapper(componentModel = "spring", uses = { IAnimalMapper.class })
+@Mapper(componentModel = "spring", uses = {
+		IAnimalMapper.class }, unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
 public interface IContactMapper extends IBaseMapper<Contact, ContactDTO> {
 
 	@Override
+	@Mapping(target = "animal", ignore = true)
 	Contact toEntity(ContactDTO dto);
 
 	@Override

@@ -2,7 +2,7 @@ package com.animaladoption.api.model;
 
 import java.io.Serial;
 
-import com.animaladoption.api.model.base.BaseEntity;
+import com.shareddtos.model.base.BaseEntity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

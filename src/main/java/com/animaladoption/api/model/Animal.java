@@ -8,8 +8,8 @@ import java.util.UUID;
 
 import com.animaladoption.api.converter.StatusAnimalConverter;
 import com.animaladoption.api.enums.StatusAnimal;
-import com.animaladoption.api.model.base.BaseEntity;
 import com.animaladoption.api.model.converter.UUIDListConverter;
+import com.shareddtos.model.base.BaseEntity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

@@ -2,7 +2,7 @@ package com.animaladoption.api.dto.animal;
 
 import java.io.Serial;
 
-import com.animaladoption.api.dto.base.BaseDTO;
+import com.shareddtos.dto.BaseDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

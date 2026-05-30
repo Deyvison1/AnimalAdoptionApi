@@ -92,7 +92,7 @@ public class CatServiceImpl implements ICatService {
 
 		// 3. Paginação + ordenação
 		Pageable pageableRequest = PageRequest.of(page.getPageNumber(), page.getPageSize(),
-				Sort.by(Sort.Direction.DESC, "createdDate"));
+				Sort.by(Sort.Direction.DESC, "creationDate"));
 
 		// 4. Busca
 		Page<Cat> cats = repo.findAll(spec, pageableRequest);
@@ -115,9 +115,10 @@ public class CatServiceImpl implements ICatService {
 		try {
 			ImageDTO img = imageClient.getImage(id);
 
-			if (Strings.isNotBlank(baseUrlImage)) {
-				img.setUrl(baseUrlImage + img.getUrl());
-			}
+			String url = imageClient.getImageUrl(id);
+
+			img.setUrl(url);
+
 			return img;
 
 		} catch (Exception e) {
@@ -125,6 +126,7 @@ public class CatServiceImpl implements ICatService {
 			throw new NotFoundException("Imagem não encontrada: " + id);
 		}
 	}
+
 
 	@Override
 	@Transactional

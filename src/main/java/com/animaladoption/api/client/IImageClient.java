@@ -12,33 +12,43 @@ import com.animaladoption.api.config.FeignAuthInterceptor;
 import com.animaladoption.api.config.FeignMultipartConfig;
 import com.animaladoption.api.dto.animal.ImageDTO;
 
-@FeignClient(
-        name = "image-api",
-        url = "${image-api.url}",
-        configuration = {FeignMultipartConfig.class, FeignAuthInterceptor.class}
-)
+@FeignClient(name = "image-api", url = "${image-api.url}", configuration = { FeignMultipartConfig.class,
+		FeignAuthInterceptor.class })
 public interface IImageClient {
 
-    @PostMapping(
-            value = "/api/image",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
-    ImageDTO uploadImage(
-            @RequestPart("file") MultipartFile file, @RequestParam("active") Boolean active
-    );
+	/**
+	 * Upload imagem
+	 */
+	@PostMapping(value = "/api/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	ImageDTO uploadImage(@RequestPart("file") MultipartFile file, @RequestParam("active") Boolean active);
 
-    @GetMapping("/api/image/{id}")
-    ImageDTO getImage(@PathVariable("id") UUID id);
+	/**
+	 * Busca metadata da imagem
+	 */
+	@GetMapping("/api/image/{id}")
+	ImageDTO getImage(@PathVariable("id") UUID id);
 
-    @PutMapping("/api/image/{id}/activate")
-    void activeImage(@PathVariable("id") UUID id);
+	/**
+	 * 👇 NOVO: pega URL do S3
+	 */
+	@GetMapping("/api/image/{id}/url")
+	String getImageUrl(@PathVariable("id") UUID id);
 
-    @PutMapping("/api/image/{ids}/disabled")
-    void disabledImage(@PathVariable("ids") List<UUID> ids);
+	/**
+	 * Ativar imagem
+	 */
+	@PutMapping("/api/image/{id}/activate")
+	void activeImage(@PathVariable("id") UUID id);
 
-    @GetMapping("/api/image/{id}/download")
-    void download(@PathVariable("id") UUID id);
+	/**
+	 * Desativar em lote (corrigido)
+	 */
+	@PutMapping("/api/image/disabled")
+	void disabledImages(@RequestBody List<UUID> ids);
 
-    @DeleteMapping("/api/image/{id}")
-    void delete(@PathVariable("id") UUID id);
+	/**
+	 * Delete imagem
+	 */
+	@DeleteMapping("/api/image/{id}")
+	void delete(@PathVariable("id") UUID id);
 }

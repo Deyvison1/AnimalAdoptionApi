@@ -1,7 +1,8 @@
 package com.animaladoption.api.dto;
 
 import com.animaladoption.api.dto.animal.AnimalDTO;
-import com.animaladoption.api.dto.base.BaseDTO;
+import com.shareddtos.dto.BaseDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
