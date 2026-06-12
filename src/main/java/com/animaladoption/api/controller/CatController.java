@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.animaladoption.api.dto.animal.UnpublishAnimalDTO;
 import com.animaladoption.api.dto.cat.CatCreateDTO;
 import com.animaladoption.api.dto.cat.CatDTO;
 import com.animaladoption.api.dto.cat.CatFilterDTO;
@@ -47,20 +49,19 @@ public class CatController {
 		return ResponseEntity.ok(service.findByIdDTO(id));
 	}
 
-	@GetMapping("/is-publish/{id}")
+	@PatchMapping("/{id}/unpublish")
 	@PreAuthorize(CatConstants.ADMIN_PUBLISH_AUTHORITY)
 	@ApiResponse(responseCode = "200", description = CatConstants.IS_PUBLISH)
-	public ResponseEntity<Void> isPublish(@PathVariable UUID id) {
-		service.isPublish(id);
+	public ResponseEntity<Void> publish(@PathVariable UUID id) {
+		service.publish(id);
 		return ResponseEntity.noContent().build();
 	}
 
-	@GetMapping("/not-publish/{id}")
+	@PatchMapping("/{id}/unpublish")
 	@PreAuthorize(CatConstants.ADMIN_PUBLISH_AUTHORITY)
 	@ApiResponse(responseCode = "200", description = CatConstants.NOT_PUBLISH)
-	public ResponseEntity<Void> notPublish(@PathVariable UUID id,
-			@RequestParam(value = "motivo", required = true) String motivo) {
-		service.notPublish(id, motivo);
+	public ResponseEntity<Void> unpublish(@PathVariable UUID id, @RequestBody UnpublishAnimalDTO dto) {
+		service.unpublish(id, dto.motivo());
 		return ResponseEntity.noContent().build();
 	}
 

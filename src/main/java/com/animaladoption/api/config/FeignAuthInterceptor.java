@@ -10,19 +10,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-/**
- * Interceptor Feign responsável por propagar o token JWT do usuário autenticado
- * nas requisições entre microsserviços.
- *
- * <p>Se não houver contexto de segurança (ex: chamada interna, agendada ou teste),
- * o interceptor ignora silenciosamente, evitando erros e mantendo logs descritivos.</p>
- */
 @Slf4j
 @Configuration
 public class FeignAuthInterceptor {
 
     @Bean
-    public RequestInterceptor requestInterceptor() {
+    RequestInterceptor requestInterceptor() {
         return new RequestInterceptor() {
             @Override
             public void apply(RequestTemplate template) {

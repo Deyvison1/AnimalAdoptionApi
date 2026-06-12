@@ -27,16 +27,7 @@ public class ImageServiceImpl implements IImageService {
 	private final IImageClient imageClient;
 	@Value("${image-api.url}")
 	private String imageApiBaseUrl;
-	// ✅ defina conforme seu ambiente
 
-	/**
-	 * Faz upload da imagem para o serviço de imagens e associa ao animal.
-	 *
-	 * @param animalId ID do animal
-	 * @param file     arquivo da imagem
-	 * @param active   indica se a imagem deve estar ativa
-	 * @return DTO da imagem salva
-	 */
 	@Override
 	@Transactional
 	public ImageDTO uploadImage(UUID animalId, MultipartFile file, boolean active) {
@@ -64,39 +55,28 @@ public class ImageServiceImpl implements IImageService {
 
 		} catch (Exception e) {
 			if (e instanceof FeignException feignEx) {
-				int status = feignEx.status(); // pega o status HTTP da Image API
-				String message = extractMessage(e); // método que extrai a mensagem do JSON
+				int status = feignEx.status();
+				String message = extractMessageFeign(e);
 				throw new ImageApiException(status, message);
 			}
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 
-	/**
-	 * Busca uma imagem pelo seu ID através do serviço de imagens.
-	 *
-	 * @param id ID da imagem
-	 * @return DTO da imagem encontrada
-	 */
 	@Override
 	public ImageDTO findById(UUID id) {
 		try {
 			return imageClient.getImage(id);
 		} catch (Exception e) {
 			if (e instanceof FeignException feignEx) {
-				int status = feignEx.status(); // pega o status HTTP da Image API
-				String message = extractMessage(e); // método que extrai a mensagem do JSON
+				int status = feignEx.status();
+				String message = extractMessageFeign(e);
 				throw new ImageApiException(status, message);
 			}
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 
-	/**
-	 * Ativa uma imagem no serviço de imagens.
-	 *
-	 * @param id ID da imagem
-	 */
 	@Override
 	public void activeImage(UUID id, List<UUID> idsIsActive) {
 		try {
@@ -107,18 +87,13 @@ public class ImageServiceImpl implements IImageService {
 			imageClient.activeImage(id);
 		} catch (Exception e) {
 			if (e instanceof FeignException feignEx) {
-				int status = feignEx.status(); // pega o status HTTP da Image API
-				String message = extractMessage(e); // método que extrai a mensagem do JSON
+				int status = feignEx.status();
+				String message = extractMessageFeign(e);
 				throw new ImageApiException(status, message);
 			}
 		}
 	}
 
-	/**
-	 * Remove uma imagem do serviço de imagens.
-	 *
-	 * @param id ID da imagem
-	 */
 	@Override
 	@Transactional
 	public void delete(UUID id, UUID animalId) {
@@ -129,27 +104,25 @@ public class ImageServiceImpl implements IImageService {
 			imageClient.delete(id);
 		} catch (Exception e) {
 			if (e instanceof FeignException feignEx) {
-				int status = feignEx.status(); // pega o status HTTP da Image API
-				String message = extractMessage(e); // método que extrai a mensagem do JSON
+				int status = feignEx.status();
+				String message = extractMessageFeign(e);
 				throw new ImageApiException(status, message);
 			}
 		}
 	}
 
-	private String extractMessage(Exception e) {
+	private String extractMessageFeign(Exception e) {
 		if (e instanceof FeignException feignEx) {
 			try {
-				// Pega o corpo da resposta se existir
 				String body = feignEx.responseBody().map(bytes -> new String(bytes.array()))
 						.orElse(feignEx.getMessage());
 
-				// Tenta ler JSON e extrair "message"
 				ObjectMapper mapper = new ObjectMapper();
 				JsonNode node = mapper.readTree(body);
 				if (node.has("message")) {
 					return node.get("message").asText();
 				}
-				return body; // fallback se não tiver "message"
+				return body;
 			} catch (Exception ex) {
 				return feignEx.getMessage();
 			}

@@ -23,7 +23,7 @@ public interface ICatService {
 
 	Page<CatDTO> findAllByAvaliableAndPublishIsTrue(Pageable page, CatFilterDTO filter);
 
-	void isPublish(UUID id);
+	void publish(UUID id);
 
-	void notPublish(UUID id, String motivo);
+	void unpublish(UUID id, String motivo);
 }

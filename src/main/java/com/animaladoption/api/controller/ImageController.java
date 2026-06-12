@@ -49,9 +49,9 @@ public class ImageController {
 			@ApiResponse(responseCode = "404", description = "Animal não encontrado"),
 			@ApiResponse(responseCode = "500", description = "Erro interno ao processar o upload") })
 	public ResponseEntity<ImageDTO> uploadImage(
-			@Parameter(description = AnimalImageConstants.PARAM_ANIMAL_ID, required = true) @PathVariable("animalId") UUID animalId,
+			@Parameter(description = AnimalImageConstants.PARAM_ANIMAL_ID, required = true) @PathVariable UUID animalId,
 
-			@Parameter(description = AnimalImageConstants.PARAM_FILE, required = true) @RequestParam("file") MultipartFile file,
+			@Parameter(description = AnimalImageConstants.PARAM_FILE, required = true) @RequestParam MultipartFile file,
 
 			@Parameter(description = AnimalImageConstants.PARAM_ACTIVE) @RequestParam(defaultValue = "false") boolean active)
 			throws IOException {
@@ -66,7 +66,7 @@ public class ImageController {
 			@ApiResponse(responseCode = "200", description = "URL da imagem retornada com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ImageDTO.class))),
 			@ApiResponse(responseCode = "404", description = "Imagem não encontrada") })
 	public ResponseEntity<ImageDTO> findById(
-			@Parameter(description = AnimalImageConstants.PARAM_IMAGE_ID, required = true) @PathVariable("id") UUID id) {
+			@Parameter(description = AnimalImageConstants.PARAM_IMAGE_ID, required = true) @PathVariable UUID id) {
 		ImageDTO dto = service.findById(id);
 		return ResponseEntity.ok(dto);
 	}

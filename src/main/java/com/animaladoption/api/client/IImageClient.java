@@ -16,39 +16,21 @@ import com.animaladoption.api.dto.animal.ImageDTO;
 		FeignAuthInterceptor.class })
 public interface IImageClient {
 
-	/**
-	 * Upload imagem
-	 */
 	@PostMapping(value = "/api/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	ImageDTO uploadImage(@RequestPart("file") MultipartFile file, @RequestParam("active") Boolean active);
+	ImageDTO uploadImage(@RequestPart("file") MultipartFile file, @RequestParam Boolean active);
 
-	/**
-	 * Busca metadata da imagem
-	 */
 	@GetMapping("/api/image/{id}")
-	ImageDTO getImage(@PathVariable("id") UUID id);
+	ImageDTO getImage(@PathVariable UUID id);
 
-	/**
-	 * 👇 NOVO: pega URL do S3
-	 */
 	@GetMapping("/api/image/{id}/url")
-	String getImageUrl(@PathVariable("id") UUID id);
+	String getImageUrl(@PathVariable UUID id);
 
-	/**
-	 * Ativar imagem
-	 */
 	@PutMapping("/api/image/{id}/activate")
-	void activeImage(@PathVariable("id") UUID id);
+	void activeImage(@PathVariable UUID id);
 
-	/**
-	 * Desativar em lote (corrigido)
-	 */
 	@PutMapping("/api/image/disabled")
 	void disabledImages(@RequestBody List<UUID> ids);
 
-	/**
-	 * Delete imagem
-	 */
 	@DeleteMapping("/api/image/{id}")
-	void delete(@PathVariable("id") UUID id);
+	void delete(@PathVariable UUID id);
 }

@@ -59,11 +59,6 @@ public class CatServiceImpl implements ICatService {
 	@Value("${image-api.url-images}")
 	private String baseUrlImage;
 
-	/*
-	 * ------------------------------------------------------------- LISTAGEM DE
-	 * CÃES -------------------------------------------------------------
-	 */
-
 	@Override
 	@Transactional(readOnly = true)
 	public Page<CatDTO> findAll(Pageable page, CatFilterDTO filter) {
@@ -75,58 +70,6 @@ public class CatServiceImpl implements ICatService {
 	public Page<CatDTO> findAllByAvaliableAndPublishIsTrue(Pageable page, CatFilterDTO filter) {
 		return findDogs(page, filter, true);
 	}
-
-	private Page<CatDTO> findDogs(Pageable page, CatFilterDTO filter, boolean onlyActive) {
-
-		Specification<Cat> spec = Specification.where(null);
-
-		// 1. Se precisa filtrar apenas ativos
-		if (onlyActive) {
-			spec = spec.and(CatSpecification.onlyAvailableAndPublished());
-		}
-
-		// 2. Aplica os filtros enviados
-		if (filter != null) {
-			spec = spec.and(CatSpecification.filterBy(filter));
-		}
-
-		// 3. Paginação + ordenação
-		Pageable pageableRequest = PageRequest.of(page.getPageNumber(), page.getPageSize(),
-				Sort.by(Sort.Direction.DESC, "creationDate"));
-
-		// 4. Busca
-		Page<Cat> cats = repo.findAll(spec, pageableRequest);
-
-		// 5. Conversão
-		return cats.map(this::convertToDtoWithImages);
-	}
-
-	private CatDTO convertToDtoWithImages(Cat cat) {
-		CatDTO dto = mapper.toDto(cat);
-
-		if (dto.getImages() != null && !dto.getImages().isEmpty()) {
-			dto.setImagesComplet(dto.getImages().stream().map(this::loadImageDTO).collect(Collectors.toList()));
-		}
-
-		return dto;
-	}
-
-	private ImageDTO loadImageDTO(UUID id) {
-		try {
-			ImageDTO img = imageClient.getImage(id);
-
-			String url = imageClient.getImageUrl(id);
-
-			img.setUrl(url);
-
-			return img;
-
-		} catch (Exception e) {
-			log.error("Erro ao carregar imagem {}: {}", id, e.getMessage());
-			throw new NotFoundException("Imagem não encontrada: " + id);
-		}
-	}
-
 
 	@Override
 	@Transactional
@@ -158,20 +101,42 @@ public class CatServiceImpl implements ICatService {
 		repo.delete(entity);
 	}
 
-	private void isDeleteDogIsPublished(Cat entity) {
-		if (entity.getStatus() == StatusAnimal.PUBLISHED) {
-			throw new NotPublishException(409, "Não e possivel excluir um animal que já está publicado");
-		}
-
-		if (entity.getStatus() == StatusAnimal.REPUBLISHED) {
-			throw new NotPublishException(409, "Não e possivel excluir um animal que está em republicação");
-		}
-	}
-
 	@Override
 	@Transactional(readOnly = true)
 	public CatDTO findByIdDTO(UUID id) {
 		return convertToDtoWithImages(findById(id));
+	}
+
+	@Override
+	@Transactional
+	public void publish(UUID id) {
+		Cat entity = findById(id);
+
+		if (StatusAnimal.DESPUBLICADO == entity.getStatus()) {
+			entity.setStatus(StatusAnimal.REPUBLISHED);
+		} else if (StatusAnimal.NOT_PUBLISHED == entity.getStatus()) {
+			entity.setStatus(StatusAnimal.PUBLISHED);
+		}
+
+		if (!entity.getAvailable()) {
+			throw new NotPublishException(400, "Somente animais disponiveis podem ser publicados.");
+		}
+
+		entity.setDateUpdateStatus(LocalDateTime.now());
+		repo.save(entity);
+	}
+
+	@Override
+	@Transactional
+	public void unpublish(UUID id, String motivo) {
+		Cat entity = findById(id);
+		if (Strings.isBlank(motivo)) {
+			throw new NotPublishException(400, "Não e possivel despublicar algum animal sem justificar o motivo.");
+		}
+
+		entity.setStatus(StatusAnimal.DESPUBLICADO);
+		entity.setMotivo(motivo);
+		repo.save(entity);
 	}
 
 	private Cat prepareCreateEntity(CatCreateDTO dto) {
@@ -187,6 +152,16 @@ public class CatServiceImpl implements ICatService {
 		entity.setContacts(contacts);
 
 		return entity;
+	}
+
+	private void isDeleteDogIsPublished(Cat entity) {
+		if (entity.getStatus() == StatusAnimal.PUBLISHED) {
+			throw new NotPublishException(409, "Não e possivel excluir um animal que já está publicado");
+		}
+
+		if (entity.getStatus() == StatusAnimal.REPUBLISHED) {
+			throw new NotPublishException(409, "Não e possivel excluir um animal que está em republicação");
+		}
 	}
 
 	private CatDTO mapUpdateToDto(CatUpdateDTO dto) {
@@ -248,35 +223,49 @@ public class CatServiceImpl implements ICatService {
 		return repo.findById(id).orElseThrow(() -> new NotFoundException("Cat não encontrado: " + id));
 	}
 
-	@Override
-	@Transactional
-	public void isPublish(UUID id) {
-		Cat entity = findById(id);
+	private Page<CatDTO> findDogs(Pageable page, CatFilterDTO filter, boolean onlyActive) {
 
-		if (StatusAnimal.DESPUBLICADO == entity.getStatus()) {
-			entity.setStatus(StatusAnimal.REPUBLISHED);
-		} else if (StatusAnimal.NOT_PUBLISHED == entity.getStatus()) {
-			entity.setStatus(StatusAnimal.PUBLISHED);
+		Specification<Cat> spec = Specification.where(null);
+
+		if (onlyActive) {
+			spec = spec.and(CatSpecification.onlyAvailableAndPublished());
 		}
 
-		if (!entity.getAvailable()) {
-			throw new NotPublishException(400, "Somente animais disponiveis podem ser publicados.");
+		if (filter != null) {
+			spec = spec.and(CatSpecification.filterBy(filter));
 		}
 
-		entity.setDateUpdateStatus(LocalDateTime.now());
-		repo.save(entity);
+		Pageable pageableRequest = PageRequest.of(page.getPageNumber(), page.getPageSize(),
+				Sort.by(Sort.Direction.DESC, "creationDate"));
+
+		Page<Cat> cats = repo.findAll(spec, pageableRequest);
+
+		return cats.map(this::convertToDtoWithImages);
 	}
 
-	@Override
-	@Transactional
-	public void notPublish(UUID id, String motivo) {
-		Cat entity = findById(id);
-		if (Strings.isBlank(motivo)) {
-			throw new NotPublishException(400, "Não e possivel despublicar algum animal sem justificar o motivo.");
+	private CatDTO convertToDtoWithImages(Cat cat) {
+		CatDTO dto = mapper.toDto(cat);
+
+		if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+			dto.setImagesComplet(dto.getImages().stream().map(this::loadImageDTO).collect(Collectors.toList()));
 		}
 
-		entity.setStatus(StatusAnimal.DESPUBLICADO);
-		entity.setMotivo(motivo);
-		repo.save(entity);
+		return dto;
+	}
+
+	private ImageDTO loadImageDTO(UUID id) {
+		try {
+			ImageDTO img = imageClient.getImage(id);
+
+			String url = imageClient.getImageUrl(id);
+
+			img.setUrl(url);
+
+			return img;
+
+		} catch (Exception e) {
+			log.error("Erro ao carregar imagem {}: {}", id, e.getMessage());
+			throw new NotFoundException("Imagem não encontrada: " + id);
+		}
 	}
 }

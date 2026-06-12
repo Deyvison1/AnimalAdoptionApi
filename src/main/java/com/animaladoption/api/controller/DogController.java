@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.animaladoption.api.dto.animal.UnpublishAnimalDTO;
 import com.animaladoption.api.dto.constants.DogConstants;
 import com.animaladoption.api.dto.dog.DogCreateDTO;
 import com.animaladoption.api.dto.dog.DogDTO;
@@ -38,22 +39,21 @@ public class DogController {
 		return ResponseEntity.ok(service.findByIdDTO(id));
 	}
 	
-	@GetMapping("/is-publish/{id}")
+	@PatchMapping("/{id}/publish")
 	@PreAuthorize(DogConstants.ADMIN_PUBLISH_AUTHORITY)
-	@ApiResponse(responseCode = "200", description = DogConstants.IS_PUBLISH)
-	public ResponseEntity<Void> isPublish(@PathVariable UUID id) {
-		service.isPublish(id);
-		return ResponseEntity.noContent().build();
+	@ApiResponse(responseCode = "204", description = DogConstants.IS_PUBLISH)
+	public ResponseEntity<Void> publish(@PathVariable UUID id) {
+	    service.publish(id);
+	    return ResponseEntity.noContent().build();
 	}
 	
-	@GetMapping("/not-publish/{id}")
+	@PatchMapping("/{id}/unpublish")
 	@PreAuthorize(DogConstants.ADMIN_PUBLISH_AUTHORITY)
-	@ApiResponse(responseCode = "200", description = DogConstants.NOT_PUBLISH)
-	public ResponseEntity<Void> notPublish(@PathVariable UUID id, @RequestParam(value = "motivo", required = true) String motivo) {
-		service.notPublish(id, motivo);
+	@ApiResponse(responseCode = "204", description = DogConstants.NOT_PUBLISH)
+	public ResponseEntity<Void> unpublish(@PathVariable UUID id, @RequestBody UnpublishAnimalDTO dto) {
+		service.unpublish(id, dto.motivo());
 		return ResponseEntity.noContent().build();
 	}
-
 
 	@GetMapping
 	@PreAuthorize(DogConstants.ADMIN_READ_AUTHORITY)

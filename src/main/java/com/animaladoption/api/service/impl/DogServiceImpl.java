@@ -45,11 +45,6 @@ public class DogServiceImpl implements IDogService {
 	@Value("${image-api.url-images}")
 	private String baseUrlImage;
 
-	/*
-	 * ------------------------------------------------------------- LISTAGEM DE
-	 * CÃES -------------------------------------------------------------
-	 */
-
 	@Override
 	@Transactional(readOnly = true)
 	public Page<DogDTO> findAll(Pageable page, DogFilterDTO filter) {
@@ -62,55 +57,36 @@ public class DogServiceImpl implements IDogService {
 		return findDogs(page, filter, true);
 	}
 
-	private Page<DogDTO> findDogs(Pageable page, DogFilterDTO filter, boolean onlyActive) {
+	@Override
+	@Transactional
+	public void publish(UUID id) {
+		Dog entity = findById(id);
 
-		Specification<Dog> spec = Specification.where(null);
-
-		// 1. Se precisa filtrar apenas ativos
-		if (onlyActive) {
-			spec = spec.and(DogSpecification.onlyAvailableAndPublished());
+		if (StatusAnimal.DESPUBLICADO == entity.getStatus()) {
+			entity.setStatus(StatusAnimal.REPUBLISHED);
+		} else if (StatusAnimal.NOT_PUBLISHED == entity.getStatus()) {
+			entity.setStatus(StatusAnimal.PUBLISHED);
 		}
 
-		// 2. Aplica os filtros enviados
-		if (filter != null) {
-			spec = spec.and(DogSpecification.filterBy(filter));
+		if (!entity.getAvailable()) {
+			throw new NotPublishException(400, "Somente animais disponiveis podem ser publicados.");
 		}
 
-		// 3. Paginação + ordenação
-		Pageable pageableRequest = PageRequest.of(page.getPageNumber(), page.getPageSize(),
-				Sort.by(Sort.Direction.DESC, "creationDate"));
-
-		// 4. Busca
-		Page<Dog> dogs = repo.findAll(spec, pageableRequest);
-
-		// 5. Conversão
-		return dogs.map(this::convertToDtoWithImages);
+		entity.setDateUpdateStatus(LocalDateTime.now());
+		repo.save(entity);
 	}
 
-	private DogDTO convertToDtoWithImages(Dog dog) {
-		DogDTO dto = mapper.toDto(dog);
-
-		if (dto.getImages() != null && !dto.getImages().isEmpty()) {
-			dto.setImagesComplet(dto.getImages().stream().map(this::loadImageDTO).collect(Collectors.toList()));
+	@Override
+	@Transactional
+	public void unpublish(UUID id, String motivo) {
+		Dog entity = findById(id);
+		if (Strings.isBlank(motivo)) {
+			throw new NotPublishException(400, "Não e possivel despublicar algum animal sem justificar o motivo.");
 		}
 
-		return dto;
-	}
-
-	private ImageDTO loadImageDTO(UUID id) {
-		try {
-			ImageDTO img = imageClient.getImage(id);
-
-			String url = imageClient.getImageUrl(id);
-
-			img.setUrl(url);
-
-			return img;
-
-		} catch (Exception e) {
-			log.error("Erro ao carregar imagem {}: {}", id, e.getMessage());
-			throw new NotFoundException("Imagem não encontrada: " + id);
-		}
+		entity.setStatus(StatusAnimal.DESPUBLICADO);
+		entity.setMotivo(motivo);
+		repo.save(entity);
 	}
 
 	@Override
@@ -143,16 +119,6 @@ public class DogServiceImpl implements IDogService {
 		repo.delete(entity);
 	}
 
-	private void isDeleteDogIsPublished(Dog entity) {
-		if (entity.getStatus() == StatusAnimal.PUBLISHED) {
-			throw new NotPublishException(409, "Não e possivel excluir um animal que já está publicado");
-		}
-
-		if (entity.getStatus() == StatusAnimal.REPUBLISHED) {
-			throw new NotPublishException(409, "Não e possivel excluir um animal que está em republicação");
-		}
-	}
-
 	@Override
 	@Transactional(readOnly = true)
 	public DogDTO findByIdDTO(UUID id) {
@@ -172,6 +138,62 @@ public class DogServiceImpl implements IDogService {
 		entity.setContacts(contacts);
 
 		return entity;
+	}
+
+	private Page<DogDTO> findDogs(Pageable page, DogFilterDTO filter, boolean onlyActive) {
+
+		Specification<Dog> spec = Specification.where(null);
+
+		if (onlyActive) {
+			spec = spec.and(DogSpecification.onlyAvailableAndPublished());
+		}
+
+		if (filter != null) {
+			spec = spec.and(DogSpecification.filterBy(filter));
+		}
+
+		Pageable pageableRequest = PageRequest.of(page.getPageNumber(), page.getPageSize(),
+				Sort.by(Sort.Direction.DESC, "creationDate"));
+
+		Page<Dog> dogs = repo.findAll(spec, pageableRequest);
+
+		return dogs.map(this::convertToDtoWithImages);
+	}
+
+	private void isDeleteDogIsPublished(Dog entity) {
+		if (entity.getStatus() == StatusAnimal.PUBLISHED) {
+			throw new NotPublishException(409, "Não e possivel excluir um animal que já está publicado");
+		}
+
+		if (entity.getStatus() == StatusAnimal.REPUBLISHED) {
+			throw new NotPublishException(409, "Não e possivel excluir um animal que está em republicação");
+		}
+	}
+
+	private DogDTO convertToDtoWithImages(Dog dog) {
+		DogDTO dto = mapper.toDto(dog);
+
+		if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+			dto.setImagesComplet(dto.getImages().stream().map(this::loadImageDTO).collect(Collectors.toList()));
+		}
+
+		return dto;
+	}
+
+	private ImageDTO loadImageDTO(UUID id) {
+		try {
+			ImageDTO img = imageClient.getImage(id);
+
+			String url = imageClient.getImageUrl(id);
+
+			img.setUrl(url);
+
+			return img;
+
+		} catch (Exception e) {
+			log.error("Erro ao carregar imagem {}: {}", id, e.getMessage());
+			throw new NotFoundException("Imagem não encontrada: " + id);
+		}
 	}
 
 	private DogDTO mapUpdateToDto(DogUpdateDTO dto) {
@@ -231,37 +253,5 @@ public class DogServiceImpl implements IDogService {
 
 	private Dog findById(UUID id) {
 		return repo.findById(id).orElseThrow(() -> new NotFoundException("Dog não encontrado: " + id));
-	}
-
-	@Override
-	@Transactional
-	public void isPublish(UUID id) {
-		Dog entity = findById(id);
-
-		if (StatusAnimal.DESPUBLICADO == entity.getStatus()) {
-			entity.setStatus(StatusAnimal.REPUBLISHED);
-		} else if (StatusAnimal.NOT_PUBLISHED == entity.getStatus()) {
-			entity.setStatus(StatusAnimal.PUBLISHED);
-		}
-
-		if (!entity.getAvailable()) {
-			throw new NotPublishException(400, "Somente animais disponiveis podem ser publicados.");
-		}
-
-		entity.setDateUpdateStatus(LocalDateTime.now());
-		repo.save(entity);
-	}
-
-	@Override
-	@Transactional
-	public void notPublish(UUID id, String motivo) {
-		Dog entity = findById(id);
-		if (Strings.isBlank(motivo)) {
-			throw new NotPublishException(400, "Não e possivel despublicar algum animal sem justificar o motivo.");
-		}
-
-		entity.setStatus(StatusAnimal.DESPUBLICADO);
-		entity.setMotivo(motivo);
-		repo.save(entity);
 	}
 }
