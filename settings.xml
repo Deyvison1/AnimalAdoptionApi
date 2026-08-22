@@ -1,0 +1,15 @@
+<servers>
+    <server>
+        <id>nexus</id>
+        <username>admin</username>
+        <password>xx</password>
+    </server>
+</servers>
+
+<mirrors>
+    <mirror>
+        <id>nexus</id>
+        <mirrorOf>*</mirrorOf>
+        <url>http://192.168.18.7:8081/repository/maven-public/</url>
+    </mirror>
+</mirrors>
