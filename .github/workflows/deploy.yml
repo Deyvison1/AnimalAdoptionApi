@@ -1,0 +1,14 @@
+name: Deploy DEV
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Teste
+        run: echo "🚀 Deploy da develop acionado!"

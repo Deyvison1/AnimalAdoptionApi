@@ -49,7 +49,7 @@ public class CatController {
 		return ResponseEntity.ok(service.findByIdDTO(id));
 	}
 
-	@PatchMapping("/{id}/unpublish")
+	@PatchMapping("/{id}/publish")
 	@PreAuthorize(CatConstants.ADMIN_PUBLISH_AUTHORITY)
 	@ApiResponse(responseCode = "200", description = CatConstants.IS_PUBLISH)
 	public ResponseEntity<Void> publish(@PathVariable UUID id) {
