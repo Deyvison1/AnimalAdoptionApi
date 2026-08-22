@@ -8,6 +8,9 @@ WORKDIR /app
 COPY settings.xml /root/.m2/settings.xml
 
 COPY pom.xml .
+
+RUN mvn help:effective-settings
+
 RUN mvn dependency:go-offline -B
 
 COPY src ./src
