@@ -14,5 +14,5 @@ services:
       - controlimage_network
 
 networks:
-  controlimage_network:
+  my-infra-docker:
     external: true
