@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+    environment: dev
 
     steps:
       - name: Checkout
@@ -16,4 +17,4 @@ jobs:
       - name: Executar deploy
         run: |
           chmod +x ./scripts/deploy.sh
-          ./scripts/deploy.sh
+          ./scripts/deploy.sh 
