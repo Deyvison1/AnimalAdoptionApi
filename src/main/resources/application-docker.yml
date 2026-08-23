@@ -3,7 +3,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://keycloak.animal-adoption.com.br:8080/realms/MY_KEYCLOAK
+          issuer-uri: http://keycloak:8080/realms/MY_KEYCLOAK
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/animal_adoption}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
