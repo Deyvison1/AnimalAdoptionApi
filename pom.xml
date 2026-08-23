@@ -32,7 +32,6 @@
 		<spring-cloud.version>2024.0.0</spring-cloud.version>
 	</properties>
 
-
 	<dependencyManagement>
 		<dependencies>
 			<!-- BOM do Spring Cloud -->
@@ -45,6 +44,19 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<repositories>
+		<repository>
+			<id>nexus-public</id>
+			<url>http://192.168.18.7:8081/repository/maven-public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
