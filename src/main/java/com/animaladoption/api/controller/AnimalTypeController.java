@@ -38,7 +38,6 @@ public class AnimalTypeController {
 	@PreAuthorize(AnimalTypeConstants.ADMIN_READ_AUTHORITY)
 	@ApiResponse(responseCode = "200", description = AnimalTypeConstants.FIND_BY_ID)
 	public ResponseEntity<AnimalTypeDTO> findById(@PathVariable UUID id) {
-		
 		return ResponseEntity.ok(service.findByIdToDto(id));
 	}
 
