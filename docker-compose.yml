@@ -10,7 +10,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 123ateo9
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://keycloak.animal-adoption.com.br:8443/realms/ANIMAL_ADOPTION
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/MY_KEYCLOAK
     networks:
       - my-infra-docker
 
