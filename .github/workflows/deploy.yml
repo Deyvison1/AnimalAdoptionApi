@@ -10,5 +10,10 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Teste
-        run: echo "🚀 Deploy da develop acionado!"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Executar deploy
+        run: |
+          chmod +x ./scripts/deploy.sh
+          ./scripts/deploy.sh
