@@ -38,7 +38,7 @@ server:
 
 image-api:
   url: http://image-api:8082
-  url-images:
+  url-images: ${BASE_URL_IMAGE:https://image-api.animal-adoption.com.br}
 
 keycloak-config:
   client-id: ANIMAL_ADOPTION_CLIENT
