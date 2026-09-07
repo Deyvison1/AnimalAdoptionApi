@@ -34,7 +34,7 @@ spring:
       encoding: UTF-8
 
 server:
-  port: 8083
+  port: 8081
 
 image-api:
   url: http://image-api:8082
