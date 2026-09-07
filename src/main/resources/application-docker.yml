@@ -6,7 +6,7 @@ spring:
           issuer-uri: http://keycloak:8080/realms/MY_KEYCLOAK
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/animal_adoption}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    username: ${SPRING_DATASOURCE_USERNAME:desenv}
     password: ${SPRING_DATASOURCE_PASSWORD:123ateo9}
     driver-class-name: org.postgresql.Driver
   flyway:

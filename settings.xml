@@ -10,7 +10,7 @@
         <server>
             <id>nexus</id>
             <username>admin</username>
-            <password>xx</password>
+            <password>nexus123ateo9</password>
         </server>
 
     </servers>
@@ -20,7 +20,7 @@
         <mirror>
             <id>nexus</id>
             <name>Nexus</name>
-            <url>http://192.168.18.7:8081/repository/maven-public/</url>
+            <url>https://nexus.animal-adoption.com.br/repository/maven-public/</url>
             <mirrorOf>*</mirrorOf>
         </mirror>
 

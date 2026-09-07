@@ -1,6 +1,6 @@
 -- DROP SCHEMA animal_adoption;
 
-CREATE SCHEMA IF NOT EXISTS animal_adoption AUTHORIZATION postgres;
+CREATE SCHEMA IF NOT EXISTS animal_adoption AUTHORIZATION desenv;
 -- animal_adoption.animal_type definição
 
 -- Drop table
@@ -19,8 +19,8 @@ CREATE TABLE animal_adoption.animal_type (
 
 -- Permissions
 
-ALTER TABLE animal_adoption.animal_type OWNER TO postgres;
-GRANT ALL ON TABLE animal_adoption.animal_type TO postgres;
+ALTER TABLE animal_adoption.animal_type OWNER TO desenv;
+GRANT ALL ON TABLE animal_adoption.animal_type TO desenv;
 
 
 -- animal_adoption.breed definição
@@ -44,8 +44,8 @@ CREATE TABLE animal_adoption.breed (
 
 -- Permissions
 
-ALTER TABLE animal_adoption.breed OWNER TO postgres;
-GRANT ALL ON TABLE animal_adoption.breed TO postgres;
+ALTER TABLE animal_adoption.breed OWNER TO desenv;
+GRANT ALL ON TABLE animal_adoption.breed TO desenv;
 
 
 -- animal_adoption.animal definição
@@ -71,8 +71,8 @@ CREATE TABLE animal_adoption.animal (
 
 -- Permissions
 
-ALTER TABLE animal_adoption.animal OWNER TO postgres;
-GRANT ALL ON TABLE animal_adoption.animal TO postgres;
+ALTER TABLE animal_adoption.animal OWNER TO desenv;
+GRANT ALL ON TABLE animal_adoption.animal TO desenv;
 
 
 -- animal_adoption.cat definição
@@ -90,8 +90,8 @@ CREATE TABLE animal_adoption.cat (
 
 -- Permissions
 
-ALTER TABLE animal_adoption.cat OWNER TO postgres;
-GRANT ALL ON TABLE animal_adoption.cat TO postgres;
+ALTER TABLE animal_adoption.cat OWNER TO desenv;
+GRANT ALL ON TABLE animal_adoption.cat TO desenv;
 
 
 -- animal_adoption.contact definição
@@ -115,8 +115,8 @@ CREATE TABLE animal_adoption.contact (
 
 -- Permissions
 
-ALTER TABLE animal_adoption.contact OWNER TO postgres;
-GRANT ALL ON TABLE animal_adoption.contact TO postgres;
+ALTER TABLE animal_adoption.contact OWNER TO desenv;
+GRANT ALL ON TABLE animal_adoption.contact TO desenv;
 
 
 -- animal_adoption.dog definição
@@ -134,12 +134,12 @@ CREATE TABLE animal_adoption.dog (
 
 -- Permissions
 
-ALTER TABLE animal_adoption.dog OWNER TO postgres;
-GRANT ALL ON TABLE animal_adoption.dog TO postgres;
+ALTER TABLE animal_adoption.dog OWNER TO desenv;
+GRANT ALL ON TABLE animal_adoption.dog TO desenv;
 
 
 
 
 -- Permissions
 
-GRANT ALL ON SCHEMA animal_adoption TO postgres;
+GRANT ALL ON SCHEMA animal_adoption TO desenv;

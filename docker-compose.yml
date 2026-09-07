@@ -7,10 +7,10 @@ services:
       - "8083:8083"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/animal_adoption
-      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_USERNAME: desenv
       SPRING_DATASOURCE_PASSWORD: 123ateo9
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak.animal-adoption.com.br:8080/realms/MY_KEYCLOAK
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://auth.animal-adoption.com.br/realms/MY_KEYCLOAK
     extra_hosts:
       - "keycloak.animal-adoption.com.br:192.168.18.7"
     networks:
