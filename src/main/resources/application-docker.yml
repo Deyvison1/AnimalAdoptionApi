@@ -3,23 +3,25 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://keycloak:8080/realms/MY_KEYCLOAK
+          issuer-uri: https://auth.animal-adoption.com.br/realms/MY_KEYCLOAK
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/animal_adoption}
     username: ${SPRING_DATASOURCE_USERNAME:desenv}
     password: ${SPRING_DATASOURCE_PASSWORD:123ateo9}
     driver-class-name: org.postgresql.Driver
+
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
     default-schema: animal_adoption
     validate-on-migrate: true
+
   jpa:
     hibernate:
       ddl-auto: none
     show-sql: true
-
     properties:
       hibernate:
         format_sql: true
@@ -36,7 +38,8 @@ server:
 
 image-api:
   url: http://image-api:8082
-  url-images: 
+  url-images:
+
 keycloak-config:
   client-id: ANIMAL_ADOPTION_CLIENT
   client-secret: rb308smILPAIuMrKYBqF9XrLwAPLd4Xm
